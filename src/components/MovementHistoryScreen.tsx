@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { 
   ArrowLeftRight, 
   ArrowRight, 
+  ArrowDown,
   Search, 
   Filter, 
   Calendar, 
@@ -186,74 +187,55 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Top Banner with Action Button */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-5 rounded-xl border border-slate-200 shadow-xs">
-        <div>
-          <div className="flex items-center gap-2 text-blue-600 font-semibold text-xs uppercase tracking-wider">
-            <ArrowLeftRight className="w-4 h-4" />
-            <span>Auditoria e Logística Reversa</span>
+      {/* Filter, Search and Action Bar */}
+      <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row gap-2.5 sm:gap-3 items-stretch md:items-center justify-between">
+        <div className="flex-1 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
+          <div className="relative flex-1">
+            <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              id="input-search-movements"
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              placeholder="Buscar por patrimônio, técnico, colaborador, setor..."
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs sm:text-sm text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500 min-h-[40px]"
+            />
           </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-            Histórico de Movimentação de Bens
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            Rastreabilidade total: o que saiu, o que entrou, onde foi instalado, quem recebeu e qual técnico executou.
-          </p>
+
+          <div className="grid grid-cols-1 xs:grid-cols-2 sm:flex items-center gap-2 text-xs">
+            <select
+              value={filterDestination}
+              onChange={(e) => setFilterDestination(e.target.value)}
+              className="px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium min-h-[40px] w-full sm:w-auto"
+            >
+              <option value="all">Destino Antigo (Todos)</option>
+              <option value="Estoque Reserva">Estoque Reserva</option>
+              <option value="Descarte/Leilão">Descarte/Leilão</option>
+              <option value="Devolução ao Almoxarifado">Devolução Almoxarifado</option>
+            </select>
+
+            <select
+              value={filterCondition}
+              onChange={(e) => setFilterCondition(e.target.value)}
+              className="px-2.5 py-2 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium min-h-[40px] w-full sm:w-auto"
+            >
+              <option value="all">Estado Antigo (Todos)</option>
+              <option value="Funcional">Funcional</option>
+              <option value="Defeito">Defeito</option>
+              <option value="Sucata">Sucata</option>
+            </select>
+          </div>
         </div>
 
         <button
           id="btn-open-new-transfer"
           type="button"
           onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm rounded-lg shadow-sm hover:shadow transition-all"
+          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-xs transition-colors cursor-pointer shrink-0 min-h-[40px]"
         >
           <Plus className="w-4 h-4" />
-          <span>Fazer Nova Transferência (De ➔ Para)</span>
+          <span>Nova Transferência</span>
         </button>
-      </div>
-
-      {/* Filter and Search Bar */}
-      <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row gap-3 items-stretch md:items-center justify-between">
-        <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-          <input
-            id="input-search-movements"
-            type="text"
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar por patrimônio, técnico, colaborador, setor..."
-            className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-800 focus:bg-white focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-        </div>
-
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          <div className="flex items-center gap-1.5 text-slate-500 font-medium">
-            <Filter className="w-3.5 h-3.5" />
-            <span>Filtros:</span>
-          </div>
-
-          <select
-            value={filterDestination}
-            onChange={(e) => setFilterDestination(e.target.value)}
-            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium"
-          >
-            <option value="all">Destino Antigo (Todos)</option>
-            <option value="Estoque Reserva">Estoque Reserva</option>
-            <option value="Descarte/Leilão">Descarte/Leilão</option>
-            <option value="Devolução ao Almoxarifado">Devolução ao Almoxarifado</option>
-          </select>
-
-          <select
-            value={filterCondition}
-            onChange={(e) => setFilterCondition(e.target.value)}
-            className="px-2.5 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-slate-700 font-medium"
-          >
-            <option value="all">Estado Antigo (Todos)</option>
-            <option value="Funcional">Funcional</option>
-            <option value="Defeito">Defeito</option>
-            <option value="Sucata">Sucata</option>
-          </select>
-        </div>
       </div>
 
       {/* Movements Timeline Table / Card Grid */}
@@ -296,11 +278,11 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
                 </div>
 
                 {/* Card Body: De -> Para and Location/Receiver */}
-                <div className="p-4 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+                <div className="p-3.5 sm:p-6 grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
                   {/* Left: O QUE SAIU vs O QUE ENTROU */}
-                  <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-11 gap-3 items-center">
+                  <div className="lg:col-span-7 grid grid-cols-1 sm:grid-cols-11 gap-2.5 sm:gap-3 items-center">
                     {/* O que saiu */}
-                    <div className="sm:col-span-5 p-3.5 rounded-lg bg-red-50/40 border border-red-200/70">
+                    <div className="sm:col-span-5 p-3 sm:p-3.5 rounded-xl bg-red-50/40 border border-red-200/70">
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-red-700">
                           ◀ O que saiu (Recolhido)
@@ -332,14 +314,15 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
                     </div>
 
                     {/* Arrow Divider */}
-                    <div className="sm:col-span-1 flex justify-center py-1 sm:py-0">
-                      <div className="p-1.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">
-                        <ArrowRight className="w-4 h-4" />
+                    <div className="sm:col-span-1 flex justify-center py-0.5 sm:py-0">
+                      <div className="p-1.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 shadow-2xs">
+                        <ArrowRight className="w-4 h-4 hidden sm:block" />
+                        <ArrowDown className="w-4 h-4 sm:hidden" />
                       </div>
                     </div>
 
                     {/* O que entrou */}
-                    <div className="sm:col-span-5 p-3.5 rounded-lg bg-emerald-50/40 border border-emerald-200/70">
+                    <div className="sm:col-span-5 p-3 sm:p-3.5 rounded-xl bg-emerald-50/40 border border-emerald-200/70">
                       <div className="flex items-center justify-between mb-1.5">
                         <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">
                           ▶ O que entrou (Entregue)
@@ -367,9 +350,9 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
                   </div>
 
                   {/* Right: Onde foi & Quem recebeu & Auditoria */}
-                  <div className="lg:col-span-5 space-y-3 bg-slate-50/60 p-3.5 rounded-lg border border-slate-200 text-xs">
+                  <div className="lg:col-span-5 space-y-3 bg-slate-50/60 p-3 sm:p-3.5 rounded-xl border border-slate-200 text-xs">
                     <div>
-                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1">
+                      <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
                         <MapPin className="w-3 h-3 text-slate-500" /> Onde foi instalado:
                       </span>
                       <p className="font-medium text-slate-800 mt-0.5">
@@ -379,7 +362,7 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
 
                     <div className="grid grid-cols-2 gap-2 pt-1.5 border-t border-slate-200">
                       <div>
-                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block flex items-center gap-1">
+                        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
                           <User className="w-3 h-3 text-slate-500" /> Quem recebeu:
                         </span>
                         <p className="font-semibold text-slate-900 mt-0.5">
@@ -392,7 +375,7 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
 
                       <div>
                         <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider block">
-                          Checklist de Migração:
+                          Checklist Migração:
                         </span>
                         <div className="flex items-center gap-1 mt-1">
                           <span
@@ -419,16 +402,16 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
                       </div>
                     )}
 
-                    <div className="pt-2 flex items-center justify-between">
+                    <div className="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                       <div className="flex items-center gap-1.5 text-emerald-700 text-[11px] font-semibold">
-                        <ShieldCheck className="w-3.5 h-3.5" />
+                        <ShieldCheck className="w-3.5 h-3.5 shrink-0" />
                         <span>Termo Assinado Digitalmente</span>
                       </div>
 
                       <button
                         type="button"
                         onClick={() => setSelectedMovementForDetail(mov)}
-                        className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 hover:underline"
+                        className="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1 hover:underline cursor-pointer min-h-[36px] self-start sm:self-auto"
                       >
                         <Eye className="w-3.5 h-3.5" />
                         <span>Ver Termo Completo</span>
@@ -444,30 +427,30 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
 
       {/* MODAL: REGISTRO DE NOVA TRANSFERÊNCIA (DE -> PARA) */}
       {isModalOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6">
-          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2.5 sm:p-6">
+          <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[92vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
             {/* Header */}
-            <div className="sticky top-0 bg-white px-6 py-4 border-b border-slate-200 flex items-center justify-between z-10">
+            <div className="sticky top-0 bg-white px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200 flex items-center justify-between z-10">
               <div>
-                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
-                  <ArrowLeftRight className="w-5 h-5 text-blue-600" />
-                  Nova Movimentação e Substituição de Equipamento (De ➔ Para)
+                <h2 className="text-sm sm:text-lg font-bold text-slate-900 flex items-center gap-1.5 sm:gap-2">
+                  <ArrowLeftRight className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 shrink-0" />
+                  <span>Nova Movimentação (De ➔ Para)</span>
                 </h2>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Preencha os dados do equipamento recolhido, equipamento novo entregue e validações de entrega.
+                <p className="text-[11px] sm:text-xs text-slate-500 mt-0.5">
+                  Preencha os dados de recolhimento, nova entrega e validações de campo.
                 </p>
               </div>
               <button
                 type="button"
                 onClick={() => setIsModalOpen(false)}
-                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100"
+                className="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
               >
                 <X className="w-5 h-5" />
               </button>
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={handleFormSubmit} className="p-6 space-y-6">
+            <form onSubmit={handleFormSubmit} className="p-4 sm:p-6 space-y-4 sm:space-y-6">
               {/* Quick Pick From Inventory */}
               {equipments.filter((e) => e.status === 'Disponível').length > 0 && (
                 <div className="p-3 bg-blue-50/60 border border-blue-200 rounded-xl text-xs">
@@ -803,11 +786,11 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
               </div>
 
               {/* Submit / Cancel Footer */}
-              <div className="flex items-center justify-end gap-3 pt-2">
+              <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-2 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setIsModalOpen(false)}
-                  className="px-4 py-2 text-xs font-semibold text-slate-600 hover:text-slate-800"
+                  className="w-full sm:w-auto px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 border border-slate-300 hover:bg-slate-50 rounded-xl min-h-[44px] cursor-pointer transition-colors"
                 >
                   Cancelar
                 </button>
@@ -815,9 +798,9 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
                 <button
                   id="btn-confirm-transfer"
                   type="submit"
-                  className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs rounded-lg shadow-sm hover:shadow flex items-center gap-2"
+                  className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-xs flex items-center justify-center gap-2 min-h-[44px] cursor-pointer transition-colors"
                 >
-                  <CheckCircle2 className="w-4 h-4" />
+                  <CheckCircle2 className="w-4 h-4 shrink-0" />
                   <span>Concluir Movimentação e Gerar Termo</span>
                 </button>
               </div>
@@ -828,50 +811,50 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
 
       {/* DETAIL MODAL: VISUALIZADOR DE TERMO & AUDITORIA */}
       {selectedMovementForDetail && (
-        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
-            <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
+        <div className="fixed inset-0 z-50 overflow-y-auto bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-2.5 sm:p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[92vh] sm:max-h-[90vh] overflow-y-auto shadow-2xl border border-slate-200">
+            <div className="px-4 sm:px-6 py-3.5 sm:py-4 border-b border-slate-200 flex items-center justify-between">
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-blue-600" />
-                <h3 className="font-bold text-slate-900 text-base">
+                <FileText className="w-5 h-5 text-blue-600 shrink-0" />
+                <h3 className="font-bold text-slate-900 text-sm sm:text-base">
                   Comprovante de Movimentação de Bens
                 </h3>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <button
                   type="button"
                   onClick={() => window.print()}
-                  className="text-xs text-slate-600 hover:text-blue-600 p-1.5 rounded hover:bg-slate-100 flex items-center gap-1"
+                  className="text-xs text-slate-600 hover:text-blue-600 p-2 rounded-lg hover:bg-slate-100 flex items-center gap-1 cursor-pointer min-h-[36px]"
                   title="Imprimir"
                 >
                   <Printer className="w-4 h-4" />
-                  <span>Imprimir</span>
+                  <span className="hidden sm:inline">Imprimir</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setSelectedMovementForDetail(null)}
-                  className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100"
+                  className="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 min-h-[36px] min-w-[36px] flex items-center justify-center cursor-pointer"
                 >
                   <X className="w-5 h-5" />
                 </button>
               </div>
             </div>
 
-            <div className="p-6 space-y-4 text-xs">
-              <div className="border border-slate-200 rounded-xl p-4 bg-slate-50 flex justify-between">
+            <div className="p-4 sm:p-6 space-y-3 sm:space-y-4 text-xs">
+              <div className="border border-slate-200 rounded-xl p-3 sm:p-4 bg-slate-50 flex flex-col sm:flex-row justify-between gap-2">
                 <div>
                   <p className="font-bold text-slate-900 text-sm">TERMO DE SUBSTITUIÇÃO PATRIMONIAL</p>
                   <p className="text-slate-500">Registro ID: {selectedMovementForDetail.id}</p>
                 </div>
-                <div className="text-right">
+                <div className="sm:text-right">
                   <p className="font-mono text-slate-700">{selectedMovementForDetail.timestamp}</p>
                   <p className="text-emerald-700 font-semibold">Status: Concluído e Auditado</p>
                 </div>
               </div>
 
               {/* De -> Para Table */}
-              <div className="border border-slate-200 rounded-xl overflow-hidden">
-                <table className="w-full text-left text-xs">
+              <div className="border border-slate-200 rounded-xl overflow-x-auto">
+                <table className="w-full text-left text-xs min-w-[460px]">
                   <thead className="bg-slate-100 border-b border-slate-200">
                     <tr>
                       <th className="p-2.5 font-bold text-slate-700">Fluxo</th>
@@ -912,7 +895,7 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
               </div>
 
               {/* Local e Colaborador */}
-              <div className="grid grid-cols-2 gap-3 p-3 rounded-xl border border-slate-200 bg-white">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl border border-slate-200 bg-white">
                 <div>
                   <span className="text-slate-400 block text-[10px] font-bold uppercase">
                     Setor de Instalação:
@@ -937,18 +920,18 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
                 <span className="text-slate-400 block text-[10px] font-bold uppercase mb-2">
                   Checklist Técnico Concluído:
                 </span>
-                <div className="grid grid-cols-2 gap-2 text-[11px]">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
                   <span className="flex items-center gap-1.5 text-emerald-700">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Backup de dados realizado
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Backup de dados realizado
                   </span>
                   <span className="flex items-center gap-1.5 text-emerald-700">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Ingressada no domínio/AD
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Ingressada no domínio/AD
                   </span>
                   <span className="flex items-center gap-1.5 text-emerald-700">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Impressoras mapeadas
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Impressoras mapeadas
                   </span>
                   <span className="flex items-center gap-1.5 text-emerald-700">
-                    <CheckCircle2 className="w-3.5 h-3.5" /> Perfil de usuário configurado
+                    <CheckCircle2 className="w-3.5 h-3.5 shrink-0" /> Perfil de usuário configurado
                   </span>
                 </div>
               </div>
@@ -972,20 +955,20 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
                     {selectedMovementForDetail.auditClosure.signerName.toUpperCase()}
                   </div>
                 )}
-                <div className="mt-2 flex justify-between text-[10px] text-slate-500">
+                <div className="mt-2 flex flex-col sm:flex-row sm:justify-between gap-1 text-[10px] text-slate-500">
                   <span>Técnico Responsável: {selectedMovementForDetail.techResponsible}</span>
                   <span>Autenticação: TOKEN-SHA256-VERIFIED</span>
                 </div>
               </div>
             </div>
 
-            <div className="px-6 py-3 bg-slate-50 border-t border-slate-200 text-right">
+            <div className="px-4 sm:px-6 py-3 bg-slate-50 border-t border-slate-200 text-right">
               <button
                 type="button"
                 onClick={() => setSelectedMovementForDetail(null)}
-                className="px-4 py-2 bg-slate-800 text-white rounded-lg text-xs font-semibold hover:bg-slate-900"
+                className="w-full sm:w-auto px-5 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold cursor-pointer min-h-[44px]"
               >
-                Fechar
+                Fechar Comprovante
               </button>
             </div>
           </div>

@@ -208,57 +208,7 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
 
   return (
     <div className="space-y-6">
-      {/* Top Level Navigation Tabs between Cadastrados and Registrar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs">
-        <div>
-          <div className="flex items-center gap-2 text-blue-600 font-semibold text-xs uppercase tracking-wider">
-            <Boxes className="w-4 h-4" />
-            <span>Gestão Patrimonial de Ativos</span>
-          </div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-            {activeTab === 'list' ? 'Equipamentos Cadastrados' : 'Registrar Novo Equipamento'}
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-            {activeTab === 'list'
-              ? 'Consulte o inventário completo, status de alocação e histórico de bens da empresa.'
-              : 'Preencha os dados de identificação obrigatórios, número de série e termo de responsabilidade.'}
-          </p>
-        </div>
 
-        {/* Tab Switcher Buttons */}
-        <div className="inline-flex p-1 bg-slate-100 rounded-xl border border-slate-200 shrink-0">
-          <button
-            type="button"
-            id="tab-btn-equipments-list"
-            onClick={() => handleTabSwitch('list')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'list'
-                ? 'bg-white text-blue-700 shadow-xs border border-slate-200/60'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <Boxes className="w-4 h-4" />
-            <span>Equipamentos Cadastrados</span>
-            <span className="ml-1 text-[10px] font-bold bg-slate-200/80 text-slate-700 px-1.5 py-0.5 rounded-full">
-              {equipments.length}
-            </span>
-          </button>
-
-          <button
-            type="button"
-            id="tab-btn-register-new"
-            onClick={() => handleTabSwitch('register')}
-            className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs sm:text-sm font-semibold transition-all cursor-pointer ${
-              activeTab === 'register'
-                ? 'bg-white text-blue-700 shadow-xs border border-slate-200/60'
-                : 'text-slate-600 hover:text-slate-900'
-            }`}
-          >
-            <PackagePlus className="w-4 h-4" />
-            <span>Registrar Novo</span>
-          </button>
-        </div>
-      </div>
 
       {feedbackMessage && (
         <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-xs">
@@ -272,7 +222,7 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
                 handleTabSwitch('list');
                 setFeedbackMessage(null);
               }}
-              className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 rounded-lg transition-colors cursor-pointer"
+              className="text-xs bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-3 py-1.5 rounded-lg transition-colors cursor-pointer min-h-[36px]"
             >
               Ver na Lista de Cadastrados →
             </button>
@@ -290,45 +240,45 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
       {/* ABA 1: EQUIPAMENTOS CADASTRADOS (INVENTÁRIO)                              */}
       {/* ========================================================================= */}
       {activeTab === 'list' && (
-        <div className="space-y-6">
+        <div className="space-y-4 sm:space-y-6">
           {/* Status Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-              <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-4">
+            <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-2xs">
+              <span className="text-[10px] sm:text-[11px] font-semibold text-slate-500 uppercase tracking-wider block truncate">
                 Total Registrados
               </span>
-              <span className="text-xl font-bold text-slate-900 mt-1 block">{equipments.length}</span>
-              <span className="text-[11px] text-slate-400">Ativos no banco local</span>
+              <span className="text-lg sm:text-xl font-bold text-slate-900 mt-1 block">{equipments.length}</span>
+              <span className="text-[10px] sm:text-[11px] text-slate-400 truncate block">Ativos no banco</span>
             </div>
 
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-              <span className="text-[11px] font-semibold text-emerald-700 uppercase tracking-wider block">
-                Disponíveis em Estoque
+            <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-2xs">
+              <span className="text-[10px] sm:text-[11px] font-semibold text-emerald-700 uppercase tracking-wider block truncate">
+                Disponíveis
               </span>
-              <span className="text-xl font-bold text-emerald-700 mt-1 block">{availableCount}</span>
-              <span className="text-[11px] text-slate-400">Prontos para entrega</span>
+              <span className="text-lg sm:text-xl font-bold text-emerald-700 mt-1 block">{availableCount}</span>
+              <span className="text-[10px] sm:text-[11px] text-slate-400 truncate block">Prontos p/ entrega</span>
             </div>
 
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-              <span className="text-[11px] font-semibold text-blue-700 uppercase tracking-wider block">
-                Em Uso com Usuários
+            <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-2xs">
+              <span className="text-[10px] sm:text-[11px] font-semibold text-blue-700 uppercase tracking-wider block truncate">
+                Em Uso
               </span>
-              <span className="text-xl font-bold text-blue-700 mt-1 block">{inUseCount}</span>
-              <span className="text-[11px] text-slate-400">Com colaboradores</span>
+              <span className="text-lg sm:text-xl font-bold text-blue-700 mt-1 block">{inUseCount}</span>
+              <span className="text-[10px] sm:text-[11px] text-slate-400 truncate block">Com colaboradores</span>
             </div>
 
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-2xs">
-              <span className="text-[11px] font-semibold text-amber-700 uppercase tracking-wider block">
-                Manutenção / Recolhidos
+            <div className="bg-white p-3.5 sm:p-4 rounded-xl border border-slate-200 shadow-2xs">
+              <span className="text-[10px] sm:text-[11px] font-semibold text-amber-700 uppercase tracking-wider block truncate">
+                Manutenção / Recolh.
               </span>
-              <span className="text-xl font-bold text-amber-700 mt-1 block">{maintenanceCount}</span>
-              <span className="text-[11px] text-slate-400">Logística reversa</span>
+              <span className="text-lg sm:text-xl font-bold text-amber-700 mt-1 block">{maintenanceCount}</span>
+              <span className="text-[10px] sm:text-[11px] text-slate-400 truncate block">Logística reversa</span>
             </div>
           </div>
 
           {/* Search, Filters & Action Bar */}
-          <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
-            <div className="flex-1 flex flex-col sm:flex-row gap-3">
+          <div className="bg-white p-3.5 sm:p-5 rounded-xl border border-slate-200 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="flex-1 flex flex-col sm:flex-row gap-2.5 sm:gap-3">
               {/* Search */}
               <div className="relative flex-1">
                 <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
@@ -337,42 +287,43 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
                   type="text"
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  placeholder="Pesquisar por Patrimônio (PAT-000000), Serial S/N, Marca ou Colaborador..."
-                  className="w-full pl-10 pr-3.5 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600"
+                  placeholder="Pesquisar por Patrimônio, Serial S/N, Marca..."
+                  className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-xs sm:text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 min-h-[40px]"
                 />
               </div>
 
-              {/* Filter by Type */}
-              <div className="sm:w-48">
-                <select
-                  id="filter-equipment-type"
-                  value={filterType}
-                  onChange={(e) => setFilterType(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs sm:text-sm text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                >
-                  <option value="all">Todos os Tipos</option>
-                  {EQUIPMENT_TYPES.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              {/* Filters in 2 columns on mobile */}
+              <div className="grid grid-cols-2 sm:flex gap-2 sm:gap-3">
+                <div className="w-full sm:w-44">
+                  <select
+                    id="filter-equipment-type"
+                    value={filterType}
+                    onChange={(e) => setFilterType(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs sm:text-sm text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 min-h-[40px]"
+                  >
+                    <option value="all">Tipos (Todos)</option>
+                    {EQUIPMENT_TYPES.map((t) => (
+                      <option key={t} value={t}>
+                        {t}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-              {/* Filter by Status */}
-              <div className="sm:w-44">
-                <select
-                  id="filter-equipment-status"
-                  value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs sm:text-sm text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20"
-                >
-                  <option value="all">Todos os Status</option>
-                  <option value="Disponível">Disponível</option>
-                  <option value="Em Uso">Em Uso</option>
-                  <option value="Em Manutenção">Em Manutenção</option>
-                  <option value="Recolhido">Recolhido</option>
-                </select>
+                <div className="w-full sm:w-40">
+                  <select
+                    id="filter-equipment-status"
+                    value={filterStatus}
+                    onChange={(e) => setFilterStatus(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-300 rounded-lg text-xs sm:text-sm text-slate-700 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 min-h-[40px]"
+                  >
+                    <option value="all">Status (Todos)</option>
+                    <option value="Disponível">Disponível</option>
+                    <option value="Em Uso">Em Uso</option>
+                    <option value="Em Manutenção">Em Manutenção</option>
+                    <option value="Recolhido">Recolhido</option>
+                  </select>
+                </div>
               </div>
             </div>
 
@@ -381,7 +332,7 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
               type="button"
               id="btn-goto-register-tab"
               onClick={() => handleTabSwitch('register')}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-lg shadow-sm transition-colors cursor-pointer shrink-0"
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-lg shadow-sm transition-colors cursor-pointer shrink-0 min-h-[40px]"
             >
               <PackagePlus className="w-4 h-4" />
               <span>Novo Equipamento</span>
@@ -535,10 +486,10 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
       {/* ABA 2: REGISTRAR NOVO EQUIPAMENTO (FORMULÁRIO DEDICADO)                   */}
       {/* ========================================================================= */}
       {activeTab === 'register' && (
-        <div className="max-w-4xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-6 sm:p-8">
-          <div className="flex items-center justify-between pb-5 mb-6 border-b border-slate-200">
+        <div className="max-w-4xl mx-auto bg-white rounded-xl sm:rounded-2xl border border-slate-200 shadow-sm overflow-hidden p-4 sm:p-6 md:p-8">
+          <div className="flex items-center justify-between pb-4 sm:pb-5 mb-5 sm:mb-6 border-b border-slate-200 gap-2">
             <div>
-              <h2 className="text-lg font-bold text-slate-900">
+              <h2 className="text-base sm:text-lg font-bold text-slate-900">
                 Ficha de Cadastro de Equipamento
               </h2>
               <p className="text-xs text-slate-500 mt-0.5">
@@ -548,14 +499,14 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
             <button
               type="button"
               onClick={() => handleTabSwitch('list')}
-              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 hover:underline cursor-pointer"
+              className="text-xs font-semibold text-blue-600 hover:text-blue-800 flex items-center gap-1 hover:underline cursor-pointer shrink-0 min-h-[36px]"
             >
-              <span>Ver Cadastrados</span>
+              <span className="hidden sm:inline">Ver Cadastrados</span>
               <Boxes className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-8">
+          <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
             {/* SEÇÃO 1: Identificação do Item */}
             <div>
               <div className="flex items-center gap-2 pb-2 mb-4 border-b border-slate-100">
@@ -679,13 +630,13 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
                 <label className="block text-xs font-semibold text-slate-700 mb-2">
                   Acessórios Inclusos (Seleção Múltipla)
                 </label>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5">
+                <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-2 sm:gap-2.5">
                   {DEFAULT_ACCESSORIES.map((acc) => {
                     const isChecked = selectedAccessories.includes(acc);
                     return (
                       <label
                         key={acc}
-                        className={`flex items-center gap-2.5 p-3 rounded-lg border text-xs cursor-pointer transition-all ${
+                        className={`flex items-center gap-2.5 p-2.5 sm:p-3 rounded-lg border text-xs cursor-pointer transition-all min-h-[44px] ${
                           isChecked
                             ? 'bg-blue-50/70 border-blue-300 text-blue-900 font-medium'
                             : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100'
@@ -695,9 +646,9 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => handleToggleAccessory(acc)}
-                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4"
+                          className="rounded border-slate-300 text-blue-600 focus:ring-blue-500 w-4 h-4 shrink-0"
                         />
-                        <span>{acc}</span>
+                        <span className="leading-snug">{acc}</span>
                       </label>
                     );
                   })}
@@ -804,7 +755,7 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
               <button
                 type="button"
                 onClick={() => handleTabSwitch('list')}
-                className="w-full sm:w-auto px-5 py-2.5 border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-sm rounded-xl transition-colors cursor-pointer"
+                className="w-full sm:w-auto px-5 py-2.5 border border-slate-300 hover:bg-slate-100 text-slate-700 font-semibold text-sm rounded-xl transition-colors cursor-pointer min-h-[44px]"
               >
                 Cancelar
               </button>
@@ -812,7 +763,7 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
               <button
                 id="btn-submit-equipment"
                 type="submit"
-                className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                className="w-full sm:w-auto px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-bold text-sm rounded-xl shadow-md shadow-blue-600/20 transition-all flex items-center justify-center gap-2 cursor-pointer min-h-[44px]"
               >
                 <Check className="w-4 h-4" />
                 <span>Cadastrar Equipamento no Inventário</span>
