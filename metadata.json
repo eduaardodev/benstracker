@@ -1,0 +1,6 @@
+{
+  "name": "BensTracker",
+  "description": "BensTracker - Sistema de controle de movimentação de bens corporativos e equipamentos de TI.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
