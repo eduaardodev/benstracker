@@ -492,9 +492,6 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
               <h2 className="text-base sm:text-lg font-bold text-slate-900">
                 Ficha de Cadastro de Equipamento
               </h2>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Todos os campos identificados com asterisco (*) são de preenchimento obrigatório para auditoria.
-              </p>
             </div>
             <button
               type="button"

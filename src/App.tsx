@@ -214,75 +214,115 @@ export default function App() {
       {/* Footer */}
       <footer className="bg-white border-t border-slate-200 py-4 mt-auto mb-16 md:mb-0">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {/* Collapsible hidden section for guidelines and service status */}
+          {/* Collapsible section for guidelines and operational asset lifecycle */}
           <details className="group mb-3 border-b border-slate-100 pb-3">
             <summary className="cursor-pointer select-none list-none flex items-center justify-between text-xs text-slate-500 hover:text-slate-700 transition-colors py-1">
               <span className="flex items-center gap-1.5 font-medium">
                 <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                Diretrizes de Movimentação & Status Operacional
+                Diretrizes de Movimentação & Status Operacional dos Ativos
               </span>
               <span className="flex items-center gap-1 text-[11px] text-blue-600 group-open:text-slate-500">
-                <span className="group-open:hidden">Expandir detalhes</span>
-                <span className="hidden group-open:inline">Ocultar</span>
+                <span className="group-open:hidden">Consultar normas operacionais</span>
+                <span className="hidden group-open:inline">Ocultar normas</span>
                 <ChevronDown className="w-3.5 h-3.5 transition-transform duration-200 group-open:rotate-180" />
               </span>
             </summary>
 
             <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-              {/* Diretrizes */}
+              {/* Diretrizes Operacionais */}
               <div className="bg-slate-50 rounded-xl border border-slate-200 p-4">
-                <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 mb-2">
+                <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 mb-2.5">
                   <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                  Diretrizes de Movimentação
+                  Procedimento Operacional Padrão de Movimentação (POP-TI)
                 </h4>
-                <ol className="space-y-2 text-[11px] text-slate-600">
+                <ol className="space-y-2.5 text-[11px] text-slate-600">
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-800 font-bold flex items-center justify-center shrink-0 text-[10px]">
+                    <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-800 font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5">
                       1
                     </span>
                     <div>
-                      <strong className="text-slate-800">Conferência de Patrimônio:</strong> Sempre valide
-                      o código gravado na etiqueta (PAT-XXXXXX) e o Serial de fábrica (S/N) antes de liberar.
+                      <strong className="text-slate-800">Conferência Física e Serial:</strong> Antes de liberar qualquer ativo, valide a etiqueta de patrimônio (PAT-XXXXXX) contra o Serial de fábrica (S/N) gravado na BIOS e no chassi.
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-800 font-bold flex items-center justify-center shrink-0 text-[10px]">
+                    <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-800 font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5">
                       2
                     </span>
                     <div>
-                      <strong className="text-slate-800">Checklist Obrigatório:</strong> Garantir backup
-                      local, ingresso no domínio e mapeamento de impressoras antes de recolher a máquina antiga.
+                      <strong className="text-slate-800">Conformidade LGPD e Sanitização:</strong> Todo equipamento recolhido deve passar por backup assistido do usuário e processo de sanitização lógica segura antes do retorno ao estoque ou destinação.
                     </div>
                   </li>
                   <li className="flex items-start gap-2">
-                    <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-800 font-bold flex items-center justify-center shrink-0 text-[10px]">
+                    <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-800 font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5">
                       3
                     </span>
                     <div>
-                      <strong className="text-slate-800">Aceite e Assinatura:</strong> Obter a rubrica ou
-                      carimbo digital do colaborador formalizando a custódia do bem.
+                      <strong className="text-slate-800">Assinatura Obrigatória de Custódia:</strong> Nenhuma máquina nova ou substituída tem sua entrega homologada sem a rubrica digital formal do colaborador recebedor.
+                    </div>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="w-4 h-4 rounded-full bg-blue-100 text-blue-800 font-bold flex items-center justify-center shrink-0 text-[10px] mt-0.5">
+                      4
+                    </span>
+                    <div>
+                      <strong className="text-slate-800">Triagem Técnica da Devolução:</strong> O ativo retirado é classificado em até 48h para: estoque de contingência (funcional), bancada de reparo (defeito) ou descarte ecológico (sucata).
                     </div>
                   </li>
                 </ol>
               </div>
 
-              {/* Status dos Serviços */}
-              <div className="bg-blue-50/70 border border-blue-200/80 rounded-xl p-4 flex flex-col justify-between">
+              {/* Status Operacional dos Ativos */}
+              <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 flex flex-col justify-between">
                 <div>
-                  <div className="flex items-center gap-1.5 text-blue-900 font-semibold text-xs mb-1.5">
-                    <CheckCircle2 className="w-3.5 h-3.5 text-blue-600" />
-                    Status dos Serviços Internos
+                  <h4 className="text-xs font-bold text-slate-900 flex items-center gap-1.5 mb-2.5">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                    Status Operacional dos Ativos (Ciclo de Vida)
+                  </h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                    <div className="p-2 bg-white rounded-lg border border-slate-200">
+                      <div className="flex items-center gap-1.5 font-semibold text-emerald-700">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                        Disponível (Estoque)
+                      </div>
+                      <p className="text-slate-500 text-[10px] mt-0.5">
+                        Equipamento pronto, higienizado e formatado para entrega imediata.
+                      </p>
+                    </div>
+
+                    <div className="p-2 bg-white rounded-lg border border-slate-200">
+                      <div className="flex items-center gap-1.5 font-semibold text-blue-700">
+                        <span className="w-2 h-2 rounded-full bg-blue-500" />
+                        Em Uso (Operação)
+                      </div>
+                      <p className="text-slate-500 text-[10px] mt-0.5">
+                        Alocado a colaborador ou posto com termo de responsabilidade ativo.
+                      </p>
+                    </div>
+
+                    <div className="p-2 bg-white rounded-lg border border-slate-200">
+                      <div className="flex items-center gap-1.5 font-semibold text-amber-700">
+                        <span className="w-2 h-2 rounded-full bg-amber-500" />
+                        Em Manutenção
+                      </div>
+                      <p className="text-slate-500 text-[10px] mt-0.5">
+                        Em análise de hardware, troca de peças ou garantia técnica autorizada.
+                      </p>
+                    </div>
+
+                    <div className="p-2 bg-white rounded-lg border border-slate-200">
+                      <div className="flex items-center gap-1.5 font-semibold text-purple-700">
+                        <span className="w-2 h-2 rounded-full bg-purple-500" />
+                        Recolhido / Logística Reversa
+                      </div>
+                      <p className="text-slate-500 text-[10px] mt-0.5">
+                        Recolhido em substituição, aguardando triagem no almoxarifado.
+                      </p>
+                    </div>
                   </div>
-                  <p className="text-slate-600 text-[11px] leading-relaxed">
-                    Active Directory sincronizado • Mapeamento de DNS corporativo operacional • Termos digitais criptografados com timestamp.
-                  </p>
                 </div>
-                <div className="mt-3 pt-2 border-t border-blue-200/50 flex items-center justify-between text-[10px] text-blue-800">
-                  <span>Monitoramento Ativo</span>
-                  <span className="inline-flex items-center gap-1">
-                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-                    Sistemas Operacionais
-                  </span>
+                <div className="mt-3 pt-2.5 border-t border-slate-200 flex items-center justify-between text-[10px] text-slate-500">
+                  <span>Inventário Patrimonial Auditado</span>
+                  <span className="font-semibold text-slate-700">Norma Corporativa ITAM</span>
                 </div>
               </div>
             </div>
@@ -292,7 +332,7 @@ export default function App() {
             <p>BensTracker • Sistema de Movimentação de Bens</p>
             <div className="flex items-center gap-4">
               <span>Sessão: {currentUser.matricula}</span>
-              <span>Ambiente: Produção Local</span>
+              <span>Operador: {currentUser.name}</span>
             </div>
           </div>
         </div>

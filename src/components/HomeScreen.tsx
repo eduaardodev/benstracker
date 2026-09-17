@@ -11,7 +11,9 @@ import {
   Laptop,
   RotateCcw,
   TrendingUp,
-  Building
+  Building,
+  Wrench,
+  FileText
 } from 'lucide-react';
 import { UserProfile, Equipment, MovementRecord } from '../types';
 
@@ -41,6 +43,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   // Stats
   const totalEquipments = equipments.length;
   const availableEquipments = equipments.filter((e) => e.status === 'Disponível').length;
+  const inUseEquipments = equipments.filter((e) => e.status === 'Em Uso').length;
+  const maintenanceEquipments = equipments.filter((e) => e.status === 'Em Manutenção').length;
+  const recollectedEquipments = equipments.filter((e) => e.status === 'Recolhido').length;
   const totalMovements = movements.length;
   const reversedReturns = movements.filter(
     (m) => m.oldEquipment.destination === 'Devolução ao Almoxarifado'
@@ -201,6 +206,167 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
               </div>
             </div>
           ))}
+        </div>
+      </div>
+
+      {/* Diretrizes de Movimentação e Status Operacional dos Ativos */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6">
+        {/* Status Operacional do Inventário */}
+        <div className="lg:col-span-5 bg-white rounded-xl border border-slate-200 shadow-xs p-4 sm:p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
+                  <Boxes className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-900">Status Operacional dos Ativos</h3>
+              </div>
+              <span className="text-[11px] font-medium text-slate-500 bg-slate-100 px-2 py-0.5 rounded-full">
+                {totalEquipments} no inventário
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mb-4">
+              Ciclo de vida dos equipamentos e prontidão operacional para atendimento em campo.
+            </p>
+
+            <div className="space-y-2.5">
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-emerald-50/70 border border-emerald-100">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+                  <div>
+                    <span className="text-xs font-semibold text-emerald-900 block">Disponível (Estoque Reserva)</span>
+                    <span className="text-[10px] text-emerald-700">Higienizados e prontos para rollout imediato</span>
+                  </div>
+                </div>
+                <span className="text-base font-bold text-emerald-700">{availableEquipments}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-blue-50/70 border border-blue-100">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-blue-500" />
+                  <div>
+                    <span className="text-xs font-semibold text-blue-900 block">Em Operação (Em Uso)</span>
+                    <span className="text-[10px] text-blue-700">Custódia formalizada com Termo assinado</span>
+                  </div>
+                </div>
+                <span className="text-base font-bold text-blue-700">{inUseEquipments}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-amber-50/70 border border-amber-100">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-amber-500" />
+                  <div>
+                    <span className="text-xs font-semibold text-amber-900 block">Em Manutenção / Bancada</span>
+                    <span className="text-[10px] text-amber-700">Em diagnóstico técnico ou troca de peças</span>
+                  </div>
+                </div>
+                <span className="text-base font-bold text-amber-700">{maintenanceEquipments}</span>
+              </div>
+
+              <div className="flex items-center justify-between p-2.5 rounded-lg bg-purple-50/70 border border-purple-100">
+                <div className="flex items-center gap-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-purple-500" />
+                  <div>
+                    <span className="text-xs font-semibold text-purple-900 block">Recolhido / Triagem</span>
+                    <span className="text-[10px] text-purple-700">Retirado da ponta em devolução reversa</span>
+                  </div>
+                </div>
+                <span className="text-base font-bold text-purple-700">{recollectedEquipments}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Rastreabilidade Contínua</span>
+            <button
+              type="button"
+              onClick={handleGoToEquipmentList}
+              className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer hover:underline"
+            >
+              Consultar Inventário ➔
+            </button>
+          </div>
+        </div>
+
+        {/* Diretrizes de Movimentação (Procedimento Padrão) */}
+        <div className="lg:col-span-7 bg-white rounded-xl border border-slate-200 shadow-xs p-4 sm:p-5 flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
+                  <ShieldCheck className="w-4 h-4" />
+                </div>
+                <h3 className="text-sm font-bold text-slate-900">Diretrizes de Movimentação de Ativos</h3>
+              </div>
+              <span className="text-[10px] uppercase font-bold tracking-wider text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-100">
+                POP TI & Compliance
+              </span>
+            </div>
+            <p className="text-xs text-slate-500 mb-4">
+              Padrões operacionais mandatórios para movimentação física, substituição e descarte de bens.
+            </p>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/80">
+                <div className="flex items-center gap-2 font-bold text-slate-900 mb-1">
+                  <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">
+                    1
+                  </span>
+                  <span>Conferência de Serial/BIOS</span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Validação presencial obrigatória da plaqueta <strong className="text-slate-700 font-mono">PAT-XXXXXX</strong> com o Serial de fábrica (S/N) impresso na carcaça e na BIOS.
+                </p>
+              </div>
+
+              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/80">
+                <div className="flex items-center gap-2 font-bold text-slate-900 mb-1">
+                  <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">
+                    2
+                  </span>
+                  <span>Backup & Sanitização LGPD</span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Garantir backup dos dados do usuário antes da remoção e executar procedimento de sanitização lógica (wipe) no ativo recolhido.
+                </p>
+              </div>
+
+              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/80">
+                <div className="flex items-center gap-2 font-bold text-slate-900 mb-1">
+                  <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">
+                    3
+                  </span>
+                  <span>Termo de Custódia Assinado</span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Nenhum bem é entregue sem a assinatura digital ou física do Termo de Responsabilidade pelo colaborador solicitante.
+                </p>
+              </div>
+
+              <div className="p-3 rounded-lg bg-slate-50 border border-slate-200/80">
+                <div className="flex items-center gap-2 font-bold text-slate-900 mb-1">
+                  <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">
+                    4
+                  </span>
+                  <span>Triagem Técnica em 48h</span>
+                </div>
+                <p className="text-[11px] text-slate-600 leading-relaxed">
+                  Ativos substituídos devem ser triados em até 48h para reincorporação ao estoque reserva, encaminhamento a reparo ou baixa por sucata.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
+            <span>Procedimento Operacional Padrão • ITIL / ITAM</span>
+            <button
+              type="button"
+              onClick={onOpenNewTransfer}
+              className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer hover:underline"
+            >
+              Registrar Movimentação ➔
+            </button>
+          </div>
         </div>
       </div>
     </div>
