@@ -8,7 +8,10 @@ import {
   AlertCircle,
   Loader2,
   KeyRound,
-  FileCheck
+  FileCheck,
+  Shield,
+  XCircle,
+  Check
 } from 'lucide-react';
 import { UserProfile, MovementRecord } from '../types';
 import { authService } from '../services/authService';
@@ -40,8 +43,8 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
   // Filter movements executed by this user/tech
   const userMovements = movements.filter(
     (m) =>
-      m.techResponsible.toLowerCase() === currentUser.matricula.toLowerCase() ||
-      m.techResponsible.toLowerCase().includes(currentUser.name.split(' ')[0].toLowerCase())
+      (m.techResponsible || '').toLowerCase() === currentUser.matricula.toLowerCase() ||
+      (m.techResponsible || '').toLowerCase().includes(currentUser.name.split(' ')[0].toLowerCase())
   );
 
   const totalReplacements = userMovements.length;
@@ -243,6 +246,81 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
               className="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-blue-700 font-semibold focus:outline-none cursor-default select-none"
             />
           </div>
+        </div>
+      </div>
+
+      {/* Matriz de Permissões e Perfis (RBAC) */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-xs p-6 sm:p-8">
+        <div className="pb-4 mb-6 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div>
+            <h2 className="text-base font-bold text-slate-900 flex items-center gap-2">
+              <Shield className="w-5 h-5 text-indigo-600" />
+              Matriz de Acessos e Privilégios (RBAC)
+            </h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Políticas de controle de acesso vigentes por perfil de usuário no sistema
+            </p>
+          </div>
+          <span className="text-[11px] font-semibold px-2.5 py-1 bg-indigo-50 border border-indigo-200 text-indigo-700 rounded-full w-fit">
+            Seu Perfil: {getRoleLabel()}
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs border-collapse">
+            <thead>
+              <tr className="border-b border-slate-200 bg-slate-50/70 text-slate-600">
+                <th className="py-2.5 px-3 font-semibold">Funcionalidade / Operação</th>
+                <th className={`py-2.5 px-3 font-semibold text-center ${roleCode === 'ADMIN' ? 'bg-purple-50/80 text-purple-900' : ''}`}>
+                  ADMIN (Gestor TI)
+                </th>
+                <th className={`py-2.5 px-3 font-semibold text-center ${roleCode === 'TECHNICIAN' ? 'bg-blue-50/80 text-blue-900' : ''}`}>
+                  TECHNICIAN (Suporte N2)
+                </th>
+                <th className={`py-2.5 px-3 font-semibold text-center ${roleCode === 'VIEWER' ? 'bg-emerald-50/80 text-emerald-900' : ''}`}>
+                  VIEWER (Auditor)
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              <tr>
+                <td className="py-2.5 px-3 font-medium text-slate-800">Visualizar Ativos & Garantias</td>
+                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
+                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
+                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
+              </tr>
+              <tr>
+                <td className="py-2.5 px-3 font-medium text-slate-800">Auditar Histórico & Download de PDFs</td>
+                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
+                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
+                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
+              </tr>
+              <tr>
+                <td className="py-2.5 px-3 font-medium text-slate-800">Cadastrar Novos Equipamentos (PAT)</td>
+                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
+                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
+                <td className="py-2.5 px-3 text-center text-red-500 font-semibold"><XCircle className="w-4 h-4 mx-auto text-red-400" /></td>
+              </tr>
+              <tr>
+                <td className="py-2.5 px-3 font-medium text-slate-800">Registrar Substituição / Termo de Troca</td>
+                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
+                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
+                <td className="py-2.5 px-3 text-center text-red-500 font-semibold"><XCircle className="w-4 h-4 mx-auto text-red-400" /></td>
+              </tr>
+              <tr>
+                <td className="py-2.5 px-3 font-medium text-slate-800">Gestão de Usuários & Credenciais</td>
+                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
+                <td className="py-2.5 px-3 text-center text-red-500 font-semibold"><XCircle className="w-4 h-4 mx-auto text-red-400" /></td>
+                <td className="py-2.5 px-3 text-center text-red-500 font-semibold"><XCircle className="w-4 h-4 mx-auto text-red-400" /></td>
+              </tr>
+              <tr>
+                <td className="py-2.5 px-3 font-medium text-slate-800">Acesso a APIs Administrativas (/api/admin/*)</td>
+                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
+                <td className="py-2.5 px-3 text-center text-red-500 font-semibold"><XCircle className="w-4 h-4 mx-auto text-red-400" /></td>
+                <td className="py-2.5 px-3 text-center text-red-500 font-semibold"><XCircle className="w-4 h-4 mx-auto text-red-400" /></td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 

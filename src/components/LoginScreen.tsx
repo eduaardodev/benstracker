@@ -10,35 +10,47 @@ import {
   EyeOff,
   Loader2,
   HelpCircle,
-  X
+  X,
+  UserCheck,
+  ShieldCheck,
+  ClipboardCheck,
+  Sparkles
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { authService } from '../services/authService';
+import { DEMO_USERS, LocalUserDefinition } from '../services/localAuthService';
 
 interface LoginScreenProps {
   onLoginSuccess: (user: UserProfile) => void;
 }
 
 export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
-  const [loginIdentifier, setLoginIdentifier] = useState('carlos.silva@empresa.com.br');
-  const [loginPassword, setLoginPassword] = useState('suporte@2026');
+  const [loginIdentifier, setLoginIdentifier] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [showHelpModal, setShowHelpModal] = useState(false);
+  const [selectedDemoIndex, setSelectedDemoIndex] = useState<number>(-1);
 
-  const handleLoginSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!loginIdentifier.trim() || !loginPassword.trim()) {
-      setLoginError('Por favor, informe o e-mail ou matrícula e a senha.');
-      return;
+  const handleSelectDemo = (demo: LocalUserDefinition, index: number, autoSubmit: boolean = false) => {
+    setLoginIdentifier(demo.email);
+    setLoginPassword(demo.password);
+    setSelectedDemoIndex(index);
+    setLoginError('');
+
+    if (autoSubmit) {
+      executeLogin(demo.email, demo.password);
     }
+  };
+
+  const executeLogin = async (idToUse: string, passToUse: string) => {
     setLoginError('');
     setIsLoading(true);
 
     try {
-      const result = await authService.login(loginIdentifier, loginPassword);
+      const result = await authService.login(idToUse, passToUse);
 
       if (result.success && result.user) {
         onLoginSuccess(result.user);
@@ -50,6 +62,15 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!loginIdentifier.trim() || !loginPassword.trim()) {
+      setLoginError('Por favor, informe o e-mail ou matrícula e a senha.');
+      return;
+    }
+    await executeLogin(loginIdentifier, loginPassword);
   };
 
   return (
@@ -64,20 +85,61 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
           BensTracker
         </h1>
         <p className="text-sm sm:text-base font-bold text-blue-700 mt-0.5 tracking-tight">
-          Sistema de Movimentação de Bens
+          Sistema de Movimentação de Bens & Patrimônio
         </p>
         <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-          Controle patrimonial, transferências de equipamentos e auditoria
+          Controle patrimonial de TI, transferências de equipamentos e auditoria
         </p>
       </div>
 
       {/* Main Login Card */}
       <div className="w-full max-w-md bg-white rounded-2xl border border-slate-200 shadow-xl overflow-hidden p-6 sm:p-8">
-        <div className="mb-6">
+        <div className="mb-5">
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">Acesso ao Sistema</h2>
           <p className="text-xs text-slate-500 mt-1">
-            Informe suas credenciais corporativas para continuar.
+            Informe suas credenciais corporativas ou selecione uma conta de demonstração abaixo.
           </p>
+        </div>
+
+        {/* Quick Demo Access Bar */}
+        <div className="mb-5 p-3 rounded-xl bg-slate-50 border border-slate-200/80">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
+              Acesso Rápido para Teste
+            </span>
+            <span className="text-[10px] text-blue-600 font-medium">1-Clique</span>
+          </div>
+
+          <div className="grid grid-cols-3 gap-1.5">
+            {DEMO_USERS.map((demo, idx) => {
+              const isSelected = selectedDemoIndex === idx;
+              const Icon = demo.role === 'ADMIN' ? ShieldCheck : demo.role === 'VIEWER' ? ClipboardCheck : UserCheck;
+              const roleLabel = demo.role === 'ADMIN' ? 'Admin' : demo.role === 'VIEWER' ? 'Auditor' : 'Técnico';
+
+              return (
+                <button
+                  key={demo.id}
+                  type="button"
+                  onClick={() => handleSelectDemo(demo, idx, false)}
+                  className={`p-2 rounded-lg text-left transition-all cursor-pointer border ${
+                    isSelected
+                      ? 'bg-blue-50/80 border-blue-500 text-blue-900 shadow-xs'
+                      : 'bg-white hover:bg-slate-100/70 border-slate-200 text-slate-700'
+                  }`}
+                  title={`${demo.name} (${demo.email})`}
+                >
+                  <div className="flex items-center gap-1">
+                    <Icon className={`w-3 h-3 shrink-0 ${isSelected ? 'text-blue-600' : 'text-slate-500'}`} />
+                    <span className="text-[11px] font-bold leading-none truncate">{roleLabel}</span>
+                  </div>
+                  <span className="text-[9px] text-slate-500 truncate block mt-1 font-mono">
+                    {demo.password}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
         </div>
 
         {loginError && (
@@ -99,7 +161,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 type="text"
                 required
                 value={loginIdentifier}
-                onChange={(e) => setLoginIdentifier(e.target.value)}
+                onChange={(e) => {
+                  setLoginIdentifier(e.target.value);
+                  setSelectedDemoIndex(-1);
+                  setLoginError('');
+                }}
                 placeholder="nome.sobrenome@empresa.com.br ou matrícula"
                 autoComplete="username"
                 className="w-full pl-10 pr-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all"
@@ -129,7 +195,11 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 type={showPassword ? 'text' : 'password'}
                 required
                 value={loginPassword}
-                onChange={(e) => setLoginPassword(e.target.value)}
+                onChange={(e) => {
+                  setLoginPassword(e.target.value);
+                  setSelectedDemoIndex(-1);
+                  setLoginError('');
+                }}
                 placeholder="Informe sua senha"
                 autoComplete="current-password"
                 className="w-full pl-10 pr-10 py-2.5 bg-slate-50 border border-slate-300 rounded-lg text-sm text-slate-800 placeholder-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-600 transition-all"
@@ -183,9 +253,9 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
       </div>
 
       {/* Corporate Footer */}
-      <footer className="mt-8 text-center text-xs text-slate-500 space-y-1">
+      <footer className="mt-6 text-center text-xs text-slate-500 space-y-1">
         <p>Acesso restrito a colaboradores e técnicos autorizados.</p>
-        <p className="text-slate-400">BensTracker © {new Date().getFullYear()} • Gestão de Patrimônio e Ativos de TI</p>
+        <p className="text-slate-400">BensTracker © {new Date().getFullYear()} • Compatível com Vercel, Docker & Modo Autônomo</p>
       </footer>
 
       {/* Modal de Ajuda / Recuperação de Senha */}

@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { equipmentService } from '../services/equipment.service';
-import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.middleware';
+import { authenticateToken, requireRole, AuthenticatedRequest } from '../middleware/auth.middleware';
 import { validateBody, validateQuery } from '../middleware/validate.middleware';
 import { equipmentCreateSchema, equipmentQuerySchema } from '../schemas/validation.schemas';
 
@@ -59,11 +59,12 @@ equipmentRouter.get('/:tag', async (req: Request, res: Response): Promise<void> 
 /**
  * POST /api/equipments
  * Cadastro de novo bem patrimonial com validação estrita no backend.
- * Requer autenticação e valida integridade e unicidade de patrimônio.
+ * Requer papel de Técnico ou Administrador (bloqueado para Auditor/VIEWER somente-leitura).
  */
 equipmentRouter.post(
   '/',
   authenticateToken,
+  requireRole('ADMIN', 'TECHNICIAN'),
   validateBody(equipmentCreateSchema),
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {

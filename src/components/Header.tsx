@@ -8,11 +8,14 @@ import {
   Laptop,
   Boxes,
   Menu,
-  X
+  X,
+  ShieldCheck,
+  Eye,
+  Shield
 } from 'lucide-react';
 import { UserProfile } from '../types';
 
-export type ActiveTab = 'home' | 'equipment-list' | 'new-equipment' | 'movements' | 'profile';
+export type ActiveTab = 'home' | 'equipment-list' | 'new-equipment' | 'movements' | 'profile' | 'admin';
 
 interface HeaderProps {
   currentTab: ActiveTab;
@@ -29,6 +32,9 @@ export const Header: React.FC<HeaderProps> = ({
   onLogout,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const isAdmin = currentUser.roleCode === 'ADMIN' || currentUser.email.toLowerCase().includes('admin');
+  const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
 
   const handleTabClick = (tab: ActiveTab) => {
     onSelectTab(tab);
@@ -91,19 +97,22 @@ export const Header: React.FC<HeaderProps> = ({
                 <span>Equipamentos</span>
               </button>
 
-              <button
-                id="nav-new-equipment"
-                type="button"
-                onClick={() => handleTabClick('new-equipment')}
-                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
-                  currentTab === 'new-equipment'
-                    ? 'bg-blue-50 text-blue-700'
-                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                }`}
-              >
-                <PackagePlus className="w-4 h-4 shrink-0" />
-                <span>Cadastrar Ativo</span>
-              </button>
+              {/* Botão Cadastrar Ativo: apenas para quem tem permissão de escrita (oculto para Auditor) */}
+              {!isAuditor && (
+                <button
+                  id="nav-new-equipment"
+                  type="button"
+                  onClick={() => handleTabClick('new-equipment')}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
+                    currentTab === 'new-equipment'
+                      ? 'bg-blue-50 text-blue-700'
+                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                  }`}
+                >
+                  <PackagePlus className="w-4 h-4 shrink-0" />
+                  <span>Cadastrar Ativo</span>
+                </button>
+              )}
 
               <button
                 id="nav-movements"
@@ -116,8 +125,25 @@ export const Header: React.FC<HeaderProps> = ({
                 }`}
               >
                 <ArrowLeftRight className="w-4 h-4 shrink-0" />
-                <span>Movimentações</span>
+                <span>{isAuditor ? 'Auditoria & Trocas' : 'Movimentações'}</span>
               </button>
+
+              {/* Aba Exclusiva do Administrador */}
+              {isAdmin && (
+                <button
+                  id="nav-admin-users"
+                  type="button"
+                  onClick={() => handleTabClick('admin')}
+                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
+                    currentTab === 'admin'
+                      ? 'bg-purple-50 text-purple-800 ring-1 ring-purple-200 font-semibold'
+                      : 'text-purple-700 hover:bg-purple-50/70'
+                  }`}
+                >
+                  <ShieldCheck className="w-4 h-4 shrink-0 text-purple-600" />
+                  <span>Gestão & Acessos</span>
+                </button>
+              )}
 
               <button
                 id="nav-profile"
@@ -136,19 +162,37 @@ export const Header: React.FC<HeaderProps> = ({
 
             {/* Right side items: Desktop user badge & logout, Mobile hamburger */}
             <div className="flex items-center gap-2 sm:gap-3">
+              {/* Badge indicativo de perfil */}
               <div 
-                className="text-right cursor-pointer hidden lg:block"
+                className="text-right cursor-pointer hidden lg:flex items-center gap-2"
                 onClick={() => handleTabClick('profile')}
               >
-                <p className="text-xs font-semibold text-slate-800 leading-tight">{currentUser.name}</p>
-                <p className="text-[11px] text-slate-500 font-mono">{currentUser.matricula}</p>
+                <div>
+                  <p className="text-xs font-semibold text-slate-800 leading-tight">{currentUser.name}</p>
+                  <p className="text-[11px] text-slate-500 font-mono">{currentUser.matricula}</p>
+                </div>
+                {isAdmin && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
+                    Admin
+                  </span>
+                )}
+                {isAuditor && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                    Auditor
+                  </span>
+                )}
+                {!isAdmin && !isAuditor && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
+                    Técnico
+                  </span>
+                )}
               </div>
               
               <button
                 id="btn-logout-header"
                 type="button"
                 onClick={onLogout}
-                className="hidden md:flex p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors items-center justify-center min-w-[36px] min-h-[36px]"
+                className="hidden md:flex p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors items-center justify-center min-w-[36px] min-h-[36px] cursor-pointer"
                 title="Sair do sistema"
               >
                 <LogOut className="w-4 h-4" />
@@ -179,9 +223,21 @@ export const Header: React.FC<HeaderProps> = ({
                 <p className="text-xs font-bold text-slate-900">{currentUser.name}</p>
                 <p className="text-[11px] text-slate-500 font-mono">Matrícula: {currentUser.matricula}</p>
               </div>
-              <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-semibold border border-blue-100">
-                Online
-              </span>
+              {isAdmin && (
+                <span className="text-[10px] bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-semibold border border-purple-200">
+                  Admin
+                </span>
+              )}
+              {isAuditor && (
+                <span className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-semibold border border-emerald-200">
+                  Auditor (Leitura)
+                </span>
+              )}
+              {!isAdmin && !isAuditor && (
+                <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-semibold border border-blue-100">
+                  Técnico N2
+                </span>
+              )}
             </div>
 
             <button
@@ -210,18 +266,20 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Equipamentos Cadastrados</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => handleTabClick('new-equipment')}
-              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${
-                currentTab === 'new-equipment'
-                  ? 'bg-blue-50 text-blue-700 font-semibold'
-                  : 'text-slate-700 hover:bg-slate-50'
-              }`}
-            >
-              <PackagePlus className="w-4 h-4" />
-              <span>Cadastrar Novo Ativo</span>
-            </button>
+            {!isAuditor && (
+              <button
+                type="button"
+                onClick={() => handleTabClick('new-equipment')}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${
+                  currentTab === 'new-equipment'
+                    ? 'bg-blue-50 text-blue-700 font-semibold'
+                    : 'text-slate-700 hover:bg-slate-50'
+                }`}
+              >
+                <PackagePlus className="w-4 h-4" />
+                <span>Cadastrar Novo Ativo</span>
+              </button>
+            )}
 
             <button
               type="button"
@@ -233,8 +291,23 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               <ArrowLeftRight className="w-4 h-4" />
-              <span>Movimentações & Trocas</span>
+              <span>{isAuditor ? 'Auditoria & Histórico de Trocas' : 'Movimentações & Trocas'}</span>
             </button>
+
+            {isAdmin && (
+              <button
+                type="button"
+                onClick={() => handleTabClick('admin')}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${
+                  currentTab === 'admin'
+                    ? 'bg-purple-50 text-purple-800 font-semibold'
+                    : 'text-purple-700 hover:bg-purple-50'
+                }`}
+              >
+                <ShieldCheck className="w-4 h-4 text-purple-600" />
+                <span>Gestão de Usuários & Acessos</span>
+              </button>
+            )}
 
             <button
               type="button"
@@ -253,7 +326,7 @@ export const Header: React.FC<HeaderProps> = ({
               <button
                 type="button"
                 onClick={onLogout}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors min-h-[44px]"
+                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-semibold text-red-600 hover:bg-red-50 transition-colors min-h-[44px] cursor-pointer"
               >
                 <LogOut className="w-4 h-4" />
                 <span>Sair do Sistema</span>
@@ -271,7 +344,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           onClick={() => handleTabClick('home')}
-          className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-medium transition-colors min-w-[56px] min-h-[48px] ${
+          className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-medium transition-colors min-w-[52px] min-h-[48px] ${
             currentTab === 'home' ? 'text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-800'
           }`}
         >
@@ -282,7 +355,7 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           type="button"
           onClick={() => handleTabClick('equipment-list')}
-          className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-medium transition-colors min-w-[56px] min-h-[48px] ${
+          className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-medium transition-colors min-w-[52px] min-h-[48px] ${
             currentTab === 'equipment-list' ? 'text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-800'
           }`}
         >
@@ -290,40 +363,56 @@ export const Header: React.FC<HeaderProps> = ({
           <span>Ativos</span>
         </button>
 
-        <button
-          type="button"
-          onClick={() => handleTabClick('new-equipment')}
-          className="flex flex-col items-center justify-center -mt-3 text-[10px] font-medium transition-transform active:scale-95 min-w-[56px]"
-        >
-          <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
-            currentTab === 'new-equipment' ? 'bg-blue-700 text-white ring-2 ring-blue-300' : 'bg-blue-600 text-white'
-          }`}>
-            <PackagePlus className="w-5 h-5" />
-          </div>
-          <span className={`mt-0.5 ${currentTab === 'new-equipment' ? 'text-blue-600 font-bold' : 'text-slate-600'}`}>Novo</span>
-        </button>
+        {/* Botão Central: Novo Ativo para técnicos/admin OU Gestão para Admin */}
+        {!isAuditor ? (
+          <button
+            type="button"
+            onClick={() => handleTabClick('new-equipment')}
+            className="flex flex-col items-center justify-center -mt-3 text-[10px] font-medium transition-transform active:scale-95 min-w-[52px]"
+          >
+            <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
+              currentTab === 'new-equipment' ? 'bg-blue-700 text-white ring-2 ring-blue-300' : 'bg-blue-600 text-white'
+            }`}>
+              <PackagePlus className="w-5 h-5" />
+            </div>
+            <span className={`mt-0.5 ${currentTab === 'new-equipment' ? 'text-blue-600 font-bold' : 'text-slate-600'}`}>Novo</span>
+          </button>
+        ) : null}
 
         <button
           type="button"
           onClick={() => handleTabClick('movements')}
-          className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-medium transition-colors min-w-[56px] min-h-[48px] ${
+          className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-medium transition-colors min-w-[52px] min-h-[48px] ${
             currentTab === 'movements' ? 'text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-800'
           }`}
         >
           <ArrowLeftRight className="w-5 h-5 mb-0.5" />
-          <span>Trocas</span>
+          <span>{isAuditor ? 'Auditoria' : 'Trocas'}</span>
         </button>
 
-        <button
-          type="button"
-          onClick={() => handleTabClick('profile')}
-          className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-medium transition-colors min-w-[56px] min-h-[48px] ${
-            currentTab === 'profile' ? 'text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-800'
-          }`}
-        >
-          <UserCircle className="w-5 h-5 mb-0.5" />
-          <span>Perfil</span>
-        </button>
+        {isAdmin ? (
+          <button
+            type="button"
+            onClick={() => handleTabClick('admin')}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-medium transition-colors min-w-[52px] min-h-[48px] ${
+              currentTab === 'admin' ? 'text-purple-700 font-bold' : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <ShieldCheck className="w-5 h-5 mb-0.5 text-purple-600" />
+            <span>Admin</span>
+          </button>
+        ) : (
+          <button
+            type="button"
+            onClick={() => handleTabClick('profile')}
+            className={`flex flex-col items-center justify-center py-1 px-2 rounded-lg text-[10px] font-medium transition-colors min-w-[52px] min-h-[48px] ${
+              currentTab === 'profile' ? 'text-blue-600 font-bold' : 'text-slate-500 hover:text-slate-800'
+            }`}
+          >
+            <UserCircle className="w-5 h-5 mb-0.5" />
+            <span>Perfil</span>
+          </button>
+        )}
       </nav>
     </>
   );

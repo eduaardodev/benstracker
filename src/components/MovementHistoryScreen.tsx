@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   ArrowLeftRight, 
   ArrowRight, 
@@ -37,6 +37,7 @@ interface MovementHistoryScreenProps {
   currentUser: UserProfile;
   onAddMovement: (record: MovementRecord) => Promise<boolean> | void;
   openNewTransferDirectly?: boolean;
+  onModalClose?: () => void;
 }
 
 export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
@@ -45,9 +46,24 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
   currentUser,
   onAddMovement,
   openNewTransferDirectly = false,
+  onModalClose,
 }) => {
-  const [isModalOpen, setIsModalOpen] = useState(openNewTransferDirectly);
+  const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
+  const [isModalOpen, setIsModalOpen] = useState(!isAuditor && openNewTransferDirectly);
   const [selectedMovementForDetail, setSelectedMovementForDetail] = useState<MovementRecord | null>(null);
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    if (onModalClose) {
+      onModalClose();
+    }
+  };
+
+  useEffect(() => {
+    if (openNewTransferDirectly && !isAuditor) {
+      setIsModalOpen(true);
+    }
+  }, [openNewTransferDirectly, isAuditor]);
 
   // Search and filter
   const [searchTerm, setSearchTerm] = useState('');
@@ -156,7 +172,7 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
       return;
     }
 
-    setIsModalOpen(false);
+    closeModal();
 
     // Reset fields
     setOldTag('');
@@ -175,16 +191,16 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
 
   const filteredMovements = movements.filter((mov) => {
     const matchesSearch =
-      mov.oldEquipment.tag.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mov.newEquipment.tag.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mov.locationUser.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mov.locationUser.sectorLocation.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      mov.techResponsible.toLowerCase().includes(searchTerm.toLowerCase());
+      (mov.oldEquipment?.tag || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (mov.newEquipment?.tag || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (mov.locationUser?.userName || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (mov.locationUser?.sectorLocation || '').toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (mov.techResponsible || '').toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesDestination =
-      filterDestination === 'all' || mov.oldEquipment.destination === filterDestination;
+      filterDestination === 'all' || mov.oldEquipment?.destination === filterDestination;
     const matchesCondition =
-      filterCondition === 'all' || mov.oldEquipment.condition === filterCondition;
+      filterCondition === 'all' || mov.oldEquipment?.condition === filterCondition;
 
     return matchesSearch && matchesDestination && matchesCondition;
   });
@@ -231,15 +247,22 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
           </div>
         </div>
 
-        <button
-          id="btn-open-new-transfer"
-          type="button"
-          onClick={() => setIsModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-xs transition-colors cursor-pointer shrink-0 min-h-[40px]"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Nova Transferência</span>
-        </button>
+        {isAuditor ? (
+          <div className="inline-flex items-center gap-1.5 px-3.5 py-2.5 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-xs font-semibold shrink-0 min-h-[40px]">
+            <Eye className="w-4 h-4 text-emerald-600" />
+            <span>Auditoria & Conformidade</span>
+          </div>
+        ) : (
+          <button
+            id="btn-open-new-transfer"
+            type="button"
+            onClick={() => setIsModalOpen(true)}
+            className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-xs transition-colors cursor-pointer shrink-0 min-h-[40px]"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Nova Transferência</span>
+          </button>
+        )}
       </div>
 
       {/* Movements Timeline Table / Card Grid */}
@@ -249,12 +272,17 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
             <Boxes className="w-12 h-12 text-slate-300 mx-auto mb-3" />
             <p className="font-semibold text-slate-700">Nenhum registro de movimentação encontrado</p>
             <p className="text-xs text-slate-400 mt-1">
-              Cadastre uma nova substituição pelo botão acima para alimentar o histórico.
+              {isAuditor
+                ? 'Nenhuma movimentação patrimonial registrada até o momento.'
+                : 'Cadastre uma nova substituição pelo botão acima para alimentar o histórico.'}
             </p>
           </div>
         ) : (
           filteredMovements.map((mov) => {
-            const checklistCount = Object.values(mov.checklist).filter(Boolean).length;
+            const checklistCount =
+              mov?.checklist && typeof mov.checklist === 'object'
+                ? Object.values(mov.checklist).filter(Boolean).length
+                : 4;
 
             return (
               <div
@@ -395,7 +423,7 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
                       </div>
                     </div>
 
-                    {mov.auditClosure.technicalNotes && (
+                    {mov.auditClosure?.technicalNotes && (
                       <div className="pt-1.5 border-t border-slate-200">
                         <span className="text-[10px] text-slate-400 block uppercase font-bold">
                           Observações Técnicas:
@@ -446,7 +474,7 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
               </div>
               <button
                 type="button"
-                onClick={() => setIsModalOpen(false)}
+                onClick={closeModal}
                 className="p-2 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-slate-100 min-h-[40px] min-w-[40px] flex items-center justify-center cursor-pointer"
               >
                 <X className="w-5 h-5" />
@@ -793,7 +821,7 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
               <div className="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2.5 pt-2 border-t border-slate-200">
                 <button
                   type="button"
-                  onClick={() => setIsModalOpen(false)}
+                  onClick={closeModal}
                   className="w-full sm:w-auto px-4 py-2.5 text-xs font-semibold text-slate-700 hover:text-slate-900 border border-slate-300 hover:bg-slate-50 rounded-xl min-h-[44px] cursor-pointer transition-colors"
                 >
                   Cancelar
@@ -871,27 +899,27 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
                     <tr className="bg-red-50/30">
                       <td className="p-2.5 font-semibold text-red-700">SAIU (Recolhido)</td>
                       <td className="p-2.5 font-mono font-bold">
-                        {selectedMovementForDetail.oldEquipment.tag}
+                        {selectedMovementForDetail.oldEquipment?.tag}
                       </td>
                       <td className="p-2.5 font-mono">
-                        {selectedMovementForDetail.oldEquipment.serialNumber}
+                        {selectedMovementForDetail.oldEquipment?.serialNumber}
                       </td>
                       <td className="p-2.5">
-                        {selectedMovementForDetail.oldEquipment.condition} ➔ Destino:{' '}
-                        <strong>{selectedMovementForDetail.oldEquipment.destination}</strong>
+                        {selectedMovementForDetail.oldEquipment?.condition} ➔ Destino:{' '}
+                        <strong>{selectedMovementForDetail.oldEquipment?.destination}</strong>
                       </td>
                     </tr>
                     <tr className="bg-emerald-50/30">
                       <td className="p-2.5 font-semibold text-emerald-700">ENTROU (Entregue)</td>
                       <td className="p-2.5 font-mono font-bold">
-                        {selectedMovementForDetail.newEquipment.tag}
+                        {selectedMovementForDetail.newEquipment?.tag}
                       </td>
                       <td className="p-2.5 font-mono">
-                        {selectedMovementForDetail.newEquipment.serialNumber}
+                        {selectedMovementForDetail.newEquipment?.serialNumber}
                       </td>
                       <td className="p-2.5">
-                        {selectedMovementForDetail.newEquipment.brandModel} (Host:{' '}
-                        <strong>{selectedMovementForDetail.newEquipment.hostname}</strong>)
+                        {selectedMovementForDetail.newEquipment?.brandModel} (Host:{' '}
+                        <strong>{selectedMovementForDetail.newEquipment?.hostname || 'N/A'}</strong>)
                       </td>
                     </tr>
                   </tbody>
@@ -905,7 +933,7 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
                     Setor de Instalação:
                   </span>
                   <p className="font-semibold text-slate-900 mt-0.5">
-                    {selectedMovementForDetail.locationUser.sectorLocation}
+                    {selectedMovementForDetail.locationUser?.sectorLocation}
                   </p>
                 </div>
                 <div>
@@ -913,8 +941,8 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
                     Colaborador / Matrícula:
                   </span>
                   <p className="font-semibold text-slate-900 mt-0.5">
-                    {selectedMovementForDetail.locationUser.userName} (
-                    {selectedMovementForDetail.locationUser.userRegistration})
+                    {selectedMovementForDetail.locationUser?.userName} (
+                    {selectedMovementForDetail.locationUser?.userRegistration})
                   </p>
                 </div>
               </div>
@@ -945,7 +973,7 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
                 <span className="text-slate-400 block text-[10px] font-bold uppercase mb-1">
                   Assinatura do Recebedor / Aceite Digital:
                 </span>
-                {selectedMovementForDetail.auditClosure.signatureDataUrl ? (
+                {selectedMovementForDetail.auditClosure?.signatureDataUrl ? (
                   <div className="border border-slate-200 rounded p-2 bg-slate-50 flex items-center justify-center">
                     <img
                       src={selectedMovementForDetail.auditClosure.signatureDataUrl}
@@ -956,7 +984,11 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
                 ) : (
                   <div className="p-3 bg-slate-50 border border-slate-200 rounded text-center text-slate-500 font-mono text-[11px]">
                     ACEITE DIGITAL CONFIRMADO POR{' '}
-                    {selectedMovementForDetail.auditClosure.signerName.toUpperCase()}
+                    {(
+                      selectedMovementForDetail.auditClosure?.signerName ||
+                      selectedMovementForDetail.locationUser?.userName ||
+                      'COLABORADOR'
+                    ).toUpperCase()}
                   </div>
                 )}
                 <div className="mt-2 flex flex-col sm:flex-row sm:justify-between gap-1 text-[10px] text-slate-500">

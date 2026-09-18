@@ -33,10 +33,10 @@ export const db = drizzle(async (querySql, params, method) => {
   const stmt = sqliteDb.prepare(querySql);
   if (method === 'all') {
     const rows = stmt.all(...params);
-    return { rows: rows.map((r: any) => Object.values(r)) };
+    return { rows: rows.map((r: any) => (r && typeof r === 'object' ? Object.values(r) : [])) };
   } else if (method === 'get') {
     const row = stmt.get(...params);
-    return { rows: row ? Object.values(row as any) : undefined };
+    return { rows: row && typeof row === 'object' ? Object.values(row as any) : undefined };
   } else {
     stmt.run(...params);
     return { rows: [] };

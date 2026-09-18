@@ -15,17 +15,29 @@ export interface MovementEntity {
     tag: string;
     serialNumber: string;
     brandModel: string;
-    hostname?: string;
+    hostname: string;
   };
   locationUser: {
     sectorLocation: string;
     userName: string;
     userRegistration: string;
   };
+  checklist: {
+    dataBackupDone: boolean;
+    domainAdJoined: boolean;
+    printersMapped: boolean;
+    userProfileConfigured: boolean;
+  };
   techResponsible: string;
   techName: string;
   signatureData?: string;
   observation?: string;
+  auditClosure: {
+    acceptanceTermSigned: boolean;
+    signatureDataUrl?: string;
+    signerName: string;
+    technicalNotes: string;
+  };
   createdAt: string;
 }
 
@@ -43,17 +55,29 @@ function mapRowToMovement(row: MovementSelect): MovementEntity {
       tag: row.newTag,
       serialNumber: row.newSerialNumber,
       brandModel: row.newBrandModel,
-      hostname: row.newHostname || undefined,
+      hostname: row.newHostname || '',
     },
     locationUser: {
       sectorLocation: row.sectorLocation,
       userName: row.userName,
       userRegistration: row.userRegistration,
     },
-    techResponsible: row.techResponsible,
-    techName: row.techName,
+    checklist: {
+      dataBackupDone: true,
+      domainAdJoined: true,
+      printersMapped: true,
+      userProfileConfigured: true,
+    },
+    techResponsible: row.techResponsible || row.techName || 'TI Field',
+    techName: row.techName || row.techResponsible || 'TI Field',
     signatureData: row.signatureData || undefined,
     observation: row.observation || undefined,
+    auditClosure: {
+      acceptanceTermSigned: true,
+      signatureDataUrl: row.signatureData || undefined,
+      signerName: row.userName || 'Colaborador',
+      technicalNotes: row.observation || '',
+    },
     createdAt: row.createdAt,
   };
 }

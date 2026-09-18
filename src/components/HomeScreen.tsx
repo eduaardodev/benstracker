@@ -13,7 +13,10 @@ import {
   TrendingUp,
   Building,
   Wrench,
-  FileText
+  FileText,
+  Shield,
+  Eye,
+  UserPlus
 } from 'lucide-react';
 import { UserProfile, Equipment, MovementRecord } from '../types';
 
@@ -26,6 +29,7 @@ interface HomeScreenProps {
   onNavigateToNewEquipment?: () => void;
   onNavigateToMovements: () => void;
   onOpenNewTransfer: () => void;
+  onNavigateToAdmin?: () => void;
 }
 
 export const HomeScreen: React.FC<HomeScreenProps> = ({
@@ -37,7 +41,11 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
   onNavigateToNewEquipment,
   onNavigateToMovements,
   onOpenNewTransfer,
+  onNavigateToAdmin,
 }) => {
+  const isAdmin = currentUser.roleCode === 'ADMIN' || currentUser.email.toLowerCase().includes('admin');
+  const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
+
   const handleGoToNewEquipment = onNavigateToNewEquipment || onNavigateToEquipment || (() => {});
   const handleGoToEquipmentList = onNavigateToEquipmentList || onNavigateToEquipment || (() => {});
   // Stats
@@ -53,26 +61,80 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
   return (
     <div className="space-y-6 sm:space-y-8">
-      {/* Quick Action Buttons for Field Technicians */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
-        <button
-          type="button"
-          onClick={onOpenNewTransfer}
-          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-xs transition-colors min-h-[44px] cursor-pointer"
-        >
-          <ArrowLeftRight className="w-4 h-4 shrink-0" />
-          <span>Fazer Nova Transferência de Equipamento</span>
-        </button>
+      {/* Informative Banner for Auditor */}
+      {isAuditor && (
+        <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-2xs">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-lg bg-emerald-100 text-emerald-800 shrink-0">
+              <Eye className="w-5 h-5" />
+            </div>
+            <div>
+              <p className="text-xs sm:text-sm font-bold">Modo de Auditoria e Conformidade Patrimonial (Somente Leitura)</p>
+              <p className="text-[11px] sm:text-xs text-emerald-700">
+                Seu perfil permite consulta irrestrita do inventário, validação de termos e download de relatórios. O registro de trocas é reservado para técnicos de campo e administradores.
+              </p>
+            </div>
+          </div>
+          <span className="text-[10px] font-mono font-bold uppercase bg-emerald-200/80 text-emerald-800 px-2.5 py-1 rounded-md shrink-0">
+            RBAC: VIEWER
+          </span>
+        </div>
+      )}
 
-        <button
-          type="button"
-          onClick={handleGoToNewEquipment}
-          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-xs sm:text-sm rounded-xl border border-slate-300 shadow-xs transition-colors min-h-[44px] cursor-pointer"
-        >
-          <PackagePlus className="w-4 h-4 text-blue-600 shrink-0" />
-          <span>Cadastrar Novo Ativo</span>
-        </button>
-      </div>
+      {/* Quick Action Buttons */}
+      {isAuditor ? (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
+          <button
+            type="button"
+            onClick={handleGoToEquipmentList}
+            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-emerald-700 hover:bg-emerald-800 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-xs transition-colors min-h-[44px] cursor-pointer"
+          >
+            <Boxes className="w-4 h-4 shrink-0" />
+            <span>Consultar Inventário de Ativos</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={onNavigateToMovements}
+            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-emerald-50/50 text-emerald-800 font-semibold text-xs sm:text-sm rounded-xl border border-emerald-300 shadow-xs transition-colors min-h-[44px] cursor-pointer"
+          >
+            <ArrowLeftRight className="w-4 h-4 text-emerald-700 shrink-0" />
+            <span>Auditar Histórico de Movimentações & Trocas</span>
+          </button>
+        </div>
+      ) : (
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2.5 sm:gap-3">
+          <button
+            type="button"
+            onClick={onOpenNewTransfer}
+            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-xs transition-colors min-h-[44px] cursor-pointer"
+          >
+            <ArrowLeftRight className="w-4 h-4 shrink-0" />
+            <span>Fazer Nova Transferência de Equipamento</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={handleGoToNewEquipment}
+            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 bg-white hover:bg-slate-50 text-slate-800 font-semibold text-xs sm:text-sm rounded-xl border border-slate-300 shadow-xs transition-colors min-h-[44px] cursor-pointer"
+          >
+            <PackagePlus className="w-4 h-4 text-blue-600 shrink-0" />
+            <span>Cadastrar Novo Ativo</span>
+          </button>
+
+          {isAdmin && onNavigateToAdmin && (
+            <button
+              type="button"
+              onClick={onNavigateToAdmin}
+              className="sm:flex-initial inline-flex items-center justify-center gap-2 px-4 py-3 bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs sm:text-sm rounded-xl shadow-xs transition-colors min-h-[44px] cursor-pointer"
+              title="Abrir Painel de Gestão de Usuários"
+            >
+              <ShieldCheck className="w-4 h-4 shrink-0" />
+              <span>Gestão de Usuários</span>
+            </button>
+          )}
+        </div>
+      )}
 
       {/* KPI Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4 lg:gap-6">
@@ -179,9 +241,9 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <span className="text-[10px] font-bold text-red-600 block uppercase">
                     Recolhido (Saiu):
                   </span>
-                  <p className="font-mono font-bold text-slate-900 text-xs sm:text-sm">{mov.oldEquipment.tag}</p>
+                  <p className="font-mono font-bold text-slate-900 text-xs sm:text-sm">{mov.oldEquipment?.tag}</p>
                   <p className="text-[11px] text-slate-600 mt-0.5">
-                    Motivo: <span className="font-medium">{mov.oldEquipment.condition}</span> ➔ {mov.oldEquipment.destination}
+                    Motivo: <span className="font-medium">{mov.oldEquipment?.condition}</span> ➔ {mov.oldEquipment?.destination}
                   </p>
                 </div>
 
@@ -189,19 +251,19 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
                   <span className="text-[10px] font-bold text-emerald-700 block uppercase">
                     Entregue (Entrou):
                   </span>
-                  <p className="font-mono font-bold text-slate-900 text-xs sm:text-sm">{mov.newEquipment.tag}</p>
+                  <p className="font-mono font-bold text-slate-900 text-xs sm:text-sm">{mov.newEquipment?.tag}</p>
                   <p className="text-[11px] text-slate-700 font-medium mt-0.5">
-                    {mov.newEquipment.brandModel} ({mov.newEquipment.hostname})
+                    {mov.newEquipment?.brandModel} ({mov.newEquipment?.hostname || 'N/A'})
                   </p>
                 </div>
               </div>
 
               <div className="mt-3 pt-2.5 border-t border-slate-200/60 flex flex-col sm:flex-row sm:items-center justify-between gap-1 text-[11px] text-slate-600">
                 <span>
-                  Colaborador: <strong className="text-slate-800">{mov.locationUser.userName}</strong> ({mov.locationUser.userRegistration})
+                  Colaborador: <strong className="text-slate-800">{mov.locationUser?.userName}</strong> ({mov.locationUser?.userRegistration})
                 </span>
                 <span className="text-slate-500">
-                  Setor: <em>{mov.locationUser.sectorLocation}</em>
+                  Setor: <em>{mov.locationUser?.sectorLocation}</em>
                 </span>
               </div>
             </div>
@@ -359,13 +421,23 @@ export const HomeScreen: React.FC<HomeScreenProps> = ({
 
           <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
             <span>Procedimento Operacional Padrão • ITIL / ITAM</span>
-            <button
-              type="button"
-              onClick={onOpenNewTransfer}
-              className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer hover:underline"
-            >
-              Registrar Movimentação ➔
-            </button>
+            {isAuditor ? (
+              <button
+                type="button"
+                onClick={onNavigateToMovements}
+                className="text-emerald-700 hover:text-emerald-900 font-semibold cursor-pointer hover:underline"
+              >
+                Auditar Movimentações ➔
+              </button>
+            ) : (
+              <button
+                type="button"
+                onClick={onOpenNewTransfer}
+                className="text-blue-600 hover:text-blue-800 font-semibold cursor-pointer hover:underline"
+              >
+                Registrar Movimentação ➔
+              </button>
+            )}
           </div>
         </div>
       </div>

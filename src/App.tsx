@@ -16,20 +16,33 @@ import { HomeScreen } from './components/HomeScreen';
 import { EquipmentScreen } from './components/EquipmentScreen';
 import { MovementHistoryScreen } from './components/MovementHistoryScreen';
 import { ProfileScreen } from './components/ProfileScreen';
+import { AdminUsersScreen } from './components/AdminUsersScreen';
 import { ShieldCheck, CheckCircle2, ChevronDown } from 'lucide-react';
 import { authService } from './services/authService';
 import { apiService } from './services/apiService';
+import { sanitizeMovement, sanitizeMovementsList } from './utils/movementSanitizer';
 
 export default function App() {
-  // Authentication State
+  // Authentication State: estritamente vinculada à sessão ativa da aba (sessionStorage)
+  // Limpa explicitamente quaisquer resquícios de sessões antigas salvas em localStorage
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    const savedAuth = localStorage.getItem('app_is_authenticated');
-    return savedAuth !== null ? JSON.parse(savedAuth) : true;
+    try {
+      localStorage.removeItem('app_is_authenticated');
+      localStorage.removeItem('app_current_user');
+      localStorage.removeItem('benstracker_auth_token');
+
+      const sessionActive = sessionStorage.getItem('app_is_authenticated');
+      const token = authService.getToken();
+      const sessionUser = authService.getSessionUser();
+      return Boolean(sessionActive === 'true' && token && sessionUser);
+    } catch {
+      return false;
+    }
   });
 
   const [currentUser, setCurrentUser] = useState<UserProfile>(() => {
-    const savedUser = localStorage.getItem('app_current_user');
-    return savedUser ? JSON.parse(savedUser) : INITIAL_USER;
+    const sessionUser = authService.getSessionUser();
+    return sessionUser || INITIAL_USER;
   });
 
   // Navigation State
@@ -44,8 +57,12 @@ export default function App() {
 
   // Movements Data State (with localStorage persistence)
   const [movements, setMovements] = useState<MovementRecord[]>(() => {
-    const saved = localStorage.getItem('app_movements');
-    return saved ? JSON.parse(saved) : INITIAL_MOVEMENTS;
+    try {
+      const saved = localStorage.getItem('app_movements');
+      return saved ? sanitizeMovementsList(JSON.parse(saved)) : sanitizeMovementsList(INITIAL_MOVEMENTS);
+    } catch {
+      return sanitizeMovementsList(INITIAL_MOVEMENTS);
+    }
   });
 
   // Sincronização inicial com o backend
@@ -58,21 +75,28 @@ export default function App() {
       });
       apiService.fetchMovements().then((data) => {
         if (data && data.length > 0) {
-          setMovements(data);
+          setMovements(sanitizeMovementsList(data));
         }
       });
     }
   }, [isAuthenticated]);
 
-  // Persist state updates
+  // Persistência de sessão estrita na aba atual (sessionStorage)
   useEffect(() => {
-    localStorage.setItem('app_is_authenticated', JSON.stringify(isAuthenticated));
-  }, [isAuthenticated]);
+    try {
+      if (isAuthenticated && currentUser) {
+        sessionStorage.setItem('app_is_authenticated', 'true');
+        sessionStorage.setItem('app_current_user', JSON.stringify(currentUser));
+      } else {
+        sessionStorage.removeItem('app_is_authenticated');
+        sessionStorage.removeItem('app_current_user');
+      }
+    } catch (e) {
+      console.warn('Session sync warning:', e);
+    }
+  }, [isAuthenticated, currentUser]);
 
-  useEffect(() => {
-    localStorage.setItem('app_current_user', JSON.stringify(currentUser));
-  }, [currentUser]);
-
+  // Persistência de dados patrimoniais locais (equipamentos e movimentações)
   useEffect(() => {
     localStorage.setItem('app_equipments', JSON.stringify(equipments));
   }, [equipments]);
@@ -83,6 +107,12 @@ export default function App() {
 
   // Handlers
   const handleLoginSuccess = (user: UserProfile) => {
+    authService.setSessionUser(user);
+    try {
+      sessionStorage.setItem('app_is_authenticated', 'true');
+    } catch (e) {
+      console.warn('Session set error:', e);
+    }
     setCurrentUser(user);
     setIsAuthenticated(true);
     setCurrentTab('home');
@@ -90,10 +120,39 @@ export default function App() {
 
   const handleLogout = () => {
     authService.clearToken();
+    try {
+      sessionStorage.removeItem('app_is_authenticated');
+      sessionStorage.removeItem('app_current_user');
+      localStorage.removeItem('app_is_authenticated');
+      localStorage.removeItem('app_current_user');
+    } catch (e) {
+      console.warn('Logout cleanup error:', e);
+    }
     setIsAuthenticated(false);
+    setCurrentUser(INITIAL_USER);
+    setCurrentTab('home');
   };
 
+  // RBAC Route Guard: Redireciona caso o usuário tente acessar uma aba não permitida
+  useEffect(() => {
+    const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
+    const isAdmin = currentUser.roleCode === 'ADMIN' || currentUser.email.toLowerCase().includes('admin');
+
+    if (isAuditor && currentTab === 'new-equipment') {
+      setCurrentTab('equipment-list');
+    }
+    if (!isAdmin && currentTab === 'admin') {
+      setCurrentTab('home');
+    }
+  }, [currentUser, currentTab]);
+
   const handleAddEquipment = async (equipment: Equipment): Promise<boolean> => {
+    const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
+    if (isAuditor) {
+      alert('Acesso negado: Perfil de Auditor possui acesso estritamente somente leitura.');
+      return false;
+    }
+
     // Validação estrita no backend com Zod e persistência via ORM
     const result = await apiService.createEquipment(equipment);
     if (!result.success) {
@@ -106,13 +165,19 @@ export default function App() {
   };
 
   const handleAddMovement = async (record: MovementRecord): Promise<boolean> => {
+    const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
+    if (isAuditor) {
+      alert('Acesso negado: Perfil de Auditor não pode emitir novos termos de substituição.');
+      return false;
+    }
+
     // Validação estrita no backend e persistência transacional via ORM
     const result = await apiService.createMovement(record);
     if (!result.success) {
       alert(result.error || 'Erro ao registrar movimentação.');
       return false;
     }
-    const saved = result.data || record;
+    const saved = sanitizeMovement(result.data || record);
     setMovements((prev) => [saved, ...prev]);
 
     // Update the statuses of old & new equipment automatically
@@ -140,11 +205,21 @@ export default function App() {
   };
 
   const handleInitiateTransferWithEquipment = (_equipment: Equipment) => {
+    const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
+    if (isAuditor) {
+      setCurrentTab('movements');
+      return;
+    }
     setCurrentTab('movements');
     setOpenTransferModal(true);
   };
 
   const handleOpenNewTransfer = () => {
+    const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
+    if (isAuditor) {
+      setCurrentTab('movements');
+      return;
+    }
     setCurrentTab('movements');
     setOpenTransferModal(true);
   };
@@ -187,6 +262,7 @@ export default function App() {
                 onNavigateToNewEquipment={() => setCurrentTab('new-equipment')}
                 onNavigateToMovements={() => setCurrentTab('movements')}
                 onOpenNewTransfer={handleOpenNewTransfer}
+                onNavigateToAdmin={() => setCurrentTab('admin')}
               />
             </motion.div>
           )}
@@ -205,6 +281,7 @@ export default function App() {
                 onInitiateTransfer={handleInitiateTransferWithEquipment}
                 activeSubTab={currentTab === 'new-equipment' ? 'register' : 'list'}
                 onSubTabChange={(sub) => setCurrentTab(sub === 'register' ? 'new-equipment' : 'equipment-list')}
+                currentUser={currentUser}
               />
             </motion.div>
           )}
@@ -223,7 +300,20 @@ export default function App() {
                 currentUser={currentUser}
                 onAddMovement={handleAddMovement}
                 openNewTransferDirectly={openTransferModal}
+                onModalClose={() => setOpenTransferModal(false)}
               />
+            </motion.div>
+          )}
+
+          {currentTab === 'admin' && (
+            <motion.div
+              key="admin"
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.18 }}
+            >
+              <AdminUsersScreen currentUser={currentUser} />
             </motion.div>
           )}
 

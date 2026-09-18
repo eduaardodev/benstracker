@@ -1,6 +1,6 @@
 import { Router, Request, Response } from 'express';
 import { movementService } from '../services/movement.service';
-import { authenticateToken, AuthenticatedRequest } from '../middleware/auth.middleware';
+import { authenticateToken, requireRole, AuthenticatedRequest } from '../middleware/auth.middleware';
 import { validateBody } from '../middleware/validate.middleware';
 import { movementCreateSchema } from '../schemas/validation.schemas';
 
@@ -27,11 +27,12 @@ movementRouter.get('/', async (_req: Request, res: Response): Promise<void> => {
 /**
  * POST /api/movements
  * Registra movimentação de bem patrimonial com integridade transacional ACID.
- * Valida schema estritamente no backend e executa prepared statements atômicos.
+ * Requer papel de Técnico ou Administrador (bloqueado para Auditor/VIEWER somente-leitura).
  */
 movementRouter.post(
   '/',
   authenticateToken,
+  requireRole('ADMIN', 'TECHNICIAN'),
   validateBody(movementCreateSchema),
   async (req: AuthenticatedRequest, res: Response): Promise<void> => {
     try {
