@@ -10,15 +10,10 @@ import {
   EyeOff,
   Loader2,
   HelpCircle,
-  X,
-  UserCheck,
-  ShieldCheck,
-  ClipboardCheck,
-  Sparkles
+  X
 } from 'lucide-react';
 import { UserProfile } from '../types';
 import { authService } from '../services/authService';
-import { DEMO_USERS, LocalUserDefinition } from '../services/localAuthService';
 
 interface LoginScreenProps {
   onLoginSuccess: (user: UserProfile) => void;
@@ -32,18 +27,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
   const [isLoading, setIsLoading] = useState(false);
   const [loginError, setLoginError] = useState('');
   const [showHelpModal, setShowHelpModal] = useState(false);
-  const [selectedDemoIndex, setSelectedDemoIndex] = useState<number>(-1);
-
-  const handleSelectDemo = (demo: LocalUserDefinition, index: number, autoSubmit: boolean = false) => {
-    setLoginIdentifier(demo.email);
-    setLoginPassword(demo.password);
-    setSelectedDemoIndex(index);
-    setLoginError('');
-
-    if (autoSubmit) {
-      executeLogin(demo.email, demo.password);
-    }
-  };
 
   const executeLogin = async (idToUse: string, passToUse: string) => {
     setLoginError('');
@@ -97,49 +80,8 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
         <div className="mb-5">
           <h2 className="text-xl font-bold text-slate-900 tracking-tight">Acesso ao Sistema</h2>
           <p className="text-xs text-slate-500 mt-1">
-            Informe suas credenciais corporativas ou selecione uma conta de demonstração abaixo.
+            Informe suas credenciais corporativas para acessar o painel.
           </p>
-        </div>
-
-        {/* Quick Demo Access Bar */}
-        <div className="mb-5 p-3 rounded-xl bg-slate-50 border border-slate-200/80">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-amber-500" />
-              Acesso Rápido para Teste
-            </span>
-            <span className="text-[10px] text-blue-600 font-medium">1-Clique</span>
-          </div>
-
-          <div className="grid grid-cols-3 gap-1.5">
-            {DEMO_USERS.map((demo, idx) => {
-              const isSelected = selectedDemoIndex === idx;
-              const Icon = demo.role === 'ADMIN' ? ShieldCheck : demo.role === 'VIEWER' ? ClipboardCheck : UserCheck;
-              const roleLabel = demo.role === 'ADMIN' ? 'Admin' : demo.role === 'VIEWER' ? 'Auditor' : 'Técnico';
-
-              return (
-                <button
-                  key={demo.id}
-                  type="button"
-                  onClick={() => handleSelectDemo(demo, idx, false)}
-                  className={`p-2 rounded-lg text-left transition-all cursor-pointer border ${
-                    isSelected
-                      ? 'bg-blue-50/80 border-blue-500 text-blue-900 shadow-xs'
-                      : 'bg-white hover:bg-slate-100/70 border-slate-200 text-slate-700'
-                  }`}
-                  title={`${demo.name} (${demo.email})`}
-                >
-                  <div className="flex items-center gap-1">
-                    <Icon className={`w-3 h-3 shrink-0 ${isSelected ? 'text-blue-600' : 'text-slate-500'}`} />
-                    <span className="text-[11px] font-bold leading-none truncate">{roleLabel}</span>
-                  </div>
-                  <span className="text-[9px] text-slate-500 truncate block mt-1 font-mono">
-                    {demo.password}
-                  </span>
-                </button>
-              );
-            })}
-          </div>
         </div>
 
         {loginError && (
@@ -163,7 +105,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 value={loginIdentifier}
                 onChange={(e) => {
                   setLoginIdentifier(e.target.value);
-                  setSelectedDemoIndex(-1);
                   setLoginError('');
                 }}
                 placeholder="nome.sobrenome@empresa.com.br ou matrícula"
@@ -197,7 +138,6 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
                 value={loginPassword}
                 onChange={(e) => {
                   setLoginPassword(e.target.value);
-                  setSelectedDemoIndex(-1);
                   setLoginError('');
                 }}
                 placeholder="Informe sua senha"
@@ -255,7 +195,7 @@ export const LoginScreen: React.FC<LoginScreenProps> = ({ onLoginSuccess }) => {
       {/* Corporate Footer */}
       <footer className="mt-6 text-center text-xs text-slate-500 space-y-1">
         <p>Acesso restrito a colaboradores e técnicos autorizados.</p>
-        <p className="text-slate-400">BensTracker © {new Date().getFullYear()} • Compatível com Vercel, Docker & Modo Autônomo</p>
+        <p className="text-slate-400">BensTracker © {new Date().getFullYear()}</p>
       </footer>
 
       {/* Modal de Ajuda / Recuperação de Senha */}

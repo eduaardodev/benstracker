@@ -7,7 +7,7 @@ export interface LocalUserDefinition {
   email: string;
   department: string;
   jobTitle: string;
-  role: 'ADMIN' | 'TECHNICIAN' | 'VIEWER';
+  role: 'ADMIN' | 'TECHNICIAN';
   password: string;
 }
 
@@ -23,6 +23,106 @@ export const DEMO_USERS: LocalUserDefinition[] = [
     password: 'suporte@2026',
   },
   {
+    id: 'usr-tech-02',
+    name: 'Mariana Souza Oliveira',
+    matricula: 'TEC-9043',
+    email: 'mariana.oliveira@empresa.com.br',
+    department: 'Suporte de TI - Atendimento Local',
+    jobTitle: 'Analista de Suporte Técnico N2',
+    role: 'TECHNICIAN',
+    password: 'suporte@2026',
+  },
+  {
+    id: 'usr-tech-03',
+    name: 'Lucas Gabriel Ferreira',
+    matricula: 'TEC-9044',
+    email: 'lucas.ferreira@empresa.com.br',
+    department: 'Manutenção de Hardware & Periféricos',
+    jobTitle: 'Técnico de Suporte N2',
+    role: 'TECHNICIAN',
+    password: 'suporte@2026',
+  },
+  {
+    id: 'usr-tech-04',
+    name: 'Juliana Martins Costa',
+    matricula: 'TEC-9045',
+    email: 'juliana.costa@empresa.com.br',
+    department: 'Suporte de TI & Field Service',
+    jobTitle: 'Analista de Suporte Técnico N2',
+    role: 'TECHNICIAN',
+    password: 'suporte@2026',
+  },
+  {
+    id: 'usr-tech-05',
+    name: 'Rodrigo Alves Santos',
+    matricula: 'TEC-9046',
+    email: 'rodrigo.santos@empresa.com.br',
+    department: 'Infraestrutura e Redes Locais',
+    jobTitle: 'Técnico de Suporte N2',
+    role: 'TECHNICIAN',
+    password: 'suporte@2026',
+  },
+  {
+    id: 'usr-tech-06',
+    name: 'Fernanda Lima Ribeiro',
+    matricula: 'TEC-9047',
+    email: 'fernanda.ribeiro@empresa.com.br',
+    department: 'Suporte Operacional N2',
+    jobTitle: 'Analista de Suporte Técnico N2',
+    role: 'TECHNICIAN',
+    password: 'suporte@2026',
+  },
+  {
+    id: 'usr-tech-07',
+    name: 'Bruno Henrique Cardoso',
+    matricula: 'TEC-9048',
+    email: 'bruno.cardoso@empresa.com.br',
+    department: 'Logística e Troca de Ativos',
+    jobTitle: 'Técnico de Suporte N2',
+    role: 'TECHNICIAN',
+    password: 'suporte@2026',
+  },
+  {
+    id: 'usr-tech-08',
+    name: 'Camila Rocha Barbosa',
+    matricula: 'TEC-9049',
+    email: 'camila.barbosa@empresa.com.br',
+    department: 'Central de Serviços de TI',
+    jobTitle: 'Analista de Suporte Técnico N2',
+    role: 'TECHNICIAN',
+    password: 'suporte@2026',
+  },
+  {
+    id: 'usr-tech-09',
+    name: 'Rafael Pinheiro Guimarães',
+    matricula: 'TEC-9050',
+    email: 'rafael.guimaraes@empresa.com.br',
+    department: 'Suporte de TI & Gestão de Ativos',
+    jobTitle: 'Técnico de Suporte N2',
+    role: 'TECHNICIAN',
+    password: 'suporte@2026',
+  },
+  {
+    id: 'usr-tech-10',
+    name: 'Aline Cristina Mendes',
+    matricula: 'TEC-9051',
+    email: 'aline.mendes@empresa.com.br',
+    department: 'Atendimento VIP & Workstations',
+    jobTitle: 'Analista de Suporte Técnico N2',
+    role: 'TECHNICIAN',
+    password: 'suporte@2026',
+  },
+  {
+    id: 'usr-tech-11',
+    name: 'Thiago Nogueira Duarte',
+    matricula: 'TEC-9052',
+    email: 'thiago.duarte@empresa.com.br',
+    department: 'Suporte de TI - Filial São Paulo',
+    jobTitle: 'Técnico de Suporte N2',
+    role: 'TECHNICIAN',
+    password: 'suporte@2026',
+  },
+  {
     id: 'usr-adm-01',
     name: 'Dra. Beatriz Mendes',
     matricula: 'ADM-0010',
@@ -31,16 +131,6 @@ export const DEMO_USERS: LocalUserDefinition[] = [
     jobTitle: 'Administradora de Sistemas & Ativos',
     role: 'ADMIN',
     password: 'admin@2026',
-  },
-  {
-    id: 'usr-view-01',
-    name: 'Roberto Alencar',
-    matricula: 'AUD-7701',
-    email: 'auditoria@empresa.com.br',
-    department: 'Compliance & Auditoria Corporativa',
-    jobTitle: 'Auditor de Custódia e Conformidade',
-    role: 'VIEWER',
-    password: 'auditor@2026',
   },
 ];
 
@@ -70,8 +160,7 @@ export const localAuthService = {
         u.email.toLowerCase() === cleanId ||
         u.matricula.toLowerCase() === cleanId ||
         // Também aceita variações comuns de matrícula do seed do backend
-        (cleanId === 'adm-1001' && u.role === 'ADMIN') ||
-        (cleanId === 'aud-3005' && u.role === 'VIEWER')
+        (cleanId === 'adm-1001' && u.role === 'ADMIN')
     );
 
     if (!matchedUser) {

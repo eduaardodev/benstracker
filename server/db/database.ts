@@ -56,7 +56,7 @@ export async function initializeDatabase(): Promise<void> {
       email TEXT NOT NULL UNIQUE,
       department TEXT NOT NULL,
       job_title TEXT NOT NULL,
-      role TEXT NOT NULL CHECK (role IN ('ADMIN', 'TECHNICIAN', 'VIEWER')),
+      role TEXT NOT NULL CHECK (role IN ('ADMIN', 'TECHNICIAN')),
       password_hash TEXT NOT NULL,
       created_at TEXT NOT NULL,
       last_login_at TEXT
@@ -110,7 +110,123 @@ async function seedInitialData(): Promise<void> {
   // Contas padrão de acesso com hashes gerados dinamicamente a partir do .env
   const technicianPasswordHash = await hashPassword(ENV.INITIAL_TECH_PASSWORD);
   const adminPasswordHash = await hashPassword(ENV.INITIAL_ADMIN_PASSWORD);
-  const viewerPasswordHash = await hashPassword(ENV.INITIAL_VIEWER_PASSWORD);
+
+  // Remove conta de auditor caso já exista
+  await db.delete(users).where(eq(users.id, 'usr-view-01'));
+
+  // Lista de 10 técnicos N2 adicionais
+  const additionalTechnicians = [
+    {
+      id: 'usr-tech-02',
+      name: 'Mariana Souza Oliveira',
+      matricula: 'TEC-9043',
+      email: 'mariana.oliveira@empresa.com.br',
+      department: 'Suporte de TI - Atendimento Local',
+      jobTitle: 'Analista de Suporte Técnico N2',
+      role: 'TECHNICIAN' as const,
+      passwordHash: technicianPasswordHash,
+      createdAt: '2024-04-01T08:00:00.000Z',
+    },
+    {
+      id: 'usr-tech-03',
+      name: 'Lucas Gabriel Ferreira',
+      matricula: 'TEC-9044',
+      email: 'lucas.ferreira@empresa.com.br',
+      department: 'Manutenção de Hardware & Periféricos',
+      jobTitle: 'Técnico de Suporte N2',
+      role: 'TECHNICIAN' as const,
+      passwordHash: technicianPasswordHash,
+      createdAt: '2024-04-05T08:00:00.000Z',
+    },
+    {
+      id: 'usr-tech-04',
+      name: 'Juliana Martins Costa',
+      matricula: 'TEC-9045',
+      email: 'juliana.costa@empresa.com.br',
+      department: 'Suporte de TI & Field Service',
+      jobTitle: 'Analista de Suporte Técnico N2',
+      role: 'TECHNICIAN' as const,
+      passwordHash: technicianPasswordHash,
+      createdAt: '2024-04-10T08:00:00.000Z',
+    },
+    {
+      id: 'usr-tech-05',
+      name: 'Rodrigo Alves Santos',
+      matricula: 'TEC-9046',
+      email: 'rodrigo.santos@empresa.com.br',
+      department: 'Infraestrutura e Redes Locais',
+      jobTitle: 'Técnico de Suporte N2',
+      role: 'TECHNICIAN' as const,
+      passwordHash: technicianPasswordHash,
+      createdAt: '2024-04-15T08:00:00.000Z',
+    },
+    {
+      id: 'usr-tech-06',
+      name: 'Fernanda Lima Ribeiro',
+      matricula: 'TEC-9047',
+      email: 'fernanda.ribeiro@empresa.com.br',
+      department: 'Suporte Operacional N2',
+      jobTitle: 'Analista de Suporte Técnico N2',
+      role: 'TECHNICIAN' as const,
+      passwordHash: technicianPasswordHash,
+      createdAt: '2024-04-20T08:00:00.000Z',
+    },
+    {
+      id: 'usr-tech-07',
+      name: 'Bruno Henrique Cardoso',
+      matricula: 'TEC-9048',
+      email: 'bruno.cardoso@empresa.com.br',
+      department: 'Logística e Troca de Ativos',
+      jobTitle: 'Técnico de Suporte N2',
+      role: 'TECHNICIAN' as const,
+      passwordHash: technicianPasswordHash,
+      createdAt: '2024-05-02T08:00:00.000Z',
+    },
+    {
+      id: 'usr-tech-08',
+      name: 'Camila Rocha Barbosa',
+      matricula: 'TEC-9049',
+      email: 'camila.barbosa@empresa.com.br',
+      department: 'Central de Serviços de TI',
+      jobTitle: 'Analista de Suporte Técnico N2',
+      role: 'TECHNICIAN' as const,
+      passwordHash: technicianPasswordHash,
+      createdAt: '2024-05-10T08:00:00.000Z',
+    },
+    {
+      id: 'usr-tech-09',
+      name: 'Rafael Pinheiro Guimarães',
+      matricula: 'TEC-9050',
+      email: 'rafael.guimaraes@empresa.com.br',
+      department: 'Suporte de TI & Gestão de Ativos',
+      jobTitle: 'Técnico de Suporte N2',
+      role: 'TECHNICIAN' as const,
+      passwordHash: technicianPasswordHash,
+      createdAt: '2024-05-18T08:00:00.000Z',
+    },
+    {
+      id: 'usr-tech-10',
+      name: 'Aline Cristina Mendes',
+      matricula: 'TEC-9051',
+      email: 'aline.mendes@empresa.com.br',
+      department: 'Atendimento VIP & Workstations',
+      jobTitle: 'Analista de Suporte Técnico N2',
+      role: 'TECHNICIAN' as const,
+      passwordHash: technicianPasswordHash,
+      createdAt: '2024-06-01T08:00:00.000Z',
+    },
+    {
+      id: 'usr-tech-11',
+      name: 'Thiago Nogueira Duarte',
+      matricula: 'TEC-9052',
+      email: 'thiago.duarte@empresa.com.br',
+      department: 'Suporte de TI - Filial São Paulo',
+      jobTitle: 'Técnico de Suporte N2',
+      role: 'TECHNICIAN' as const,
+      passwordHash: technicianPasswordHash,
+      createdAt: '2024-06-15T08:00:00.000Z',
+    },
+  ];
 
   const existingUsers = await db.select({ count: sql<number>`count(*)` }).from(users);
   const userCount = Number(existingUsers[0]?.count || 0);
@@ -139,23 +255,22 @@ async function seedInitialData(): Promise<void> {
         passwordHash: adminPasswordHash,
         createdAt: '2023-01-10T08:00:00.000Z',
       },
-      {
-        id: 'usr-view-01',
-        name: ENV.INITIAL_VIEWER_NAME,
-        matricula: ENV.INITIAL_VIEWER_MATRICULA,
-        email: ENV.INITIAL_VIEWER_EMAIL,
-        department: 'Compliance & Auditoria Corporativa',
-        jobTitle: 'Auditor de Custódia e Conformidade',
-        role: 'VIEWER',
-        passwordHash: viewerPasswordHash,
-        createdAt: '2024-06-01T08:00:00.000Z',
-      },
+      ...additionalTechnicians,
     ]);
   } else {
     // Atualização de credenciais pelo ORM conforme ambiente (.env)
     await db.update(users).set({ passwordHash: technicianPasswordHash }).where(eq(users.id, 'usr-tech-01'));
     await db.update(users).set({ passwordHash: adminPasswordHash }).where(eq(users.id, 'usr-adm-01'));
-    await db.update(users).set({ passwordHash: viewerPasswordHash }).where(eq(users.id, 'usr-view-01'));
+
+    // Insere os 10 técnicos adicionais caso ainda não existam no banco
+    for (const tech of additionalTechnicians) {
+      const exists = await db.select({ id: users.id }).from(users).where(eq(users.id, tech.id)).limit(1);
+      if (exists.length === 0) {
+        await db.insert(users).values(tech);
+      } else {
+        await db.update(users).set({ passwordHash: technicianPasswordHash }).where(eq(users.id, tech.id));
+      }
+    }
   }
 
   // Equipamentos iniciais

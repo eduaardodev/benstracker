@@ -135,24 +135,14 @@ export default function App() {
 
   // RBAC Route Guard: Redireciona caso o usuário tente acessar uma aba não permitida
   useEffect(() => {
-    const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
     const isAdmin = currentUser.roleCode === 'ADMIN' || currentUser.email.toLowerCase().includes('admin');
 
-    if (isAuditor && currentTab === 'new-equipment') {
-      setCurrentTab('equipment-list');
-    }
     if (!isAdmin && currentTab === 'admin') {
       setCurrentTab('home');
     }
   }, [currentUser, currentTab]);
 
   const handleAddEquipment = async (equipment: Equipment): Promise<boolean> => {
-    const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
-    if (isAuditor) {
-      alert('Acesso negado: Perfil de Auditor possui acesso estritamente somente leitura.');
-      return false;
-    }
-
     // Validação estrita no backend com Zod e persistência via ORM
     const result = await apiService.createEquipment(equipment);
     if (!result.success) {
@@ -165,12 +155,6 @@ export default function App() {
   };
 
   const handleAddMovement = async (record: MovementRecord): Promise<boolean> => {
-    const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
-    if (isAuditor) {
-      alert('Acesso negado: Perfil de Auditor não pode emitir novos termos de substituição.');
-      return false;
-    }
-
     // Validação estrita no backend e persistência transacional via ORM
     const result = await apiService.createMovement(record);
     if (!result.success) {
@@ -205,21 +189,11 @@ export default function App() {
   };
 
   const handleInitiateTransferWithEquipment = (_equipment: Equipment) => {
-    const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
-    if (isAuditor) {
-      setCurrentTab('movements');
-      return;
-    }
     setCurrentTab('movements');
     setOpenTransferModal(true);
   };
 
   const handleOpenNewTransfer = () => {
-    const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
-    if (isAuditor) {
-      setCurrentTab('movements');
-      return;
-    }
     setCurrentTab('movements');
     setOpenTransferModal(true);
   };

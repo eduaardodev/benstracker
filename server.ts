@@ -19,6 +19,9 @@ async function startServer() {
   const app = express();
   const PORT = ENV.PORT;
 
+  // Habilita trust proxy para identificar IPs corretamente atrás de reverse proxies/Cloud Run
+  app.set('trust proxy', 1);
+
   // Middlewares básicos
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));

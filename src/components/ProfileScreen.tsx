@@ -51,14 +51,12 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
 
   const getRoleLabel = () => {
     if (roleCode === 'ADMIN' || email.includes('admin')) return 'Administrador';
-    if (roleCode === 'VIEWER' || email.includes('auditoria')) return 'Auditor de Patrimônio';
     return 'Suporte Técnico N2';
   };
 
   const getRoleBadgeStyle = () => {
     const r = roleCode || (email.includes('admin') ? 'ADMIN' : 'TECHNICIAN');
     if (r === 'ADMIN') return 'bg-purple-50 text-purple-700 border-purple-200';
-    if (r === 'VIEWER') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
     return 'bg-blue-50 text-blue-700 border-blue-200';
   };
 
@@ -277,9 +275,6 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 <th className={`py-2.5 px-3 font-semibold text-center ${roleCode === 'TECHNICIAN' ? 'bg-blue-50/80 text-blue-900' : ''}`}>
                   TECHNICIAN (Suporte N2)
                 </th>
-                <th className={`py-2.5 px-3 font-semibold text-center ${roleCode === 'VIEWER' ? 'bg-emerald-50/80 text-emerald-900' : ''}`}>
-                  VIEWER (Auditor)
-                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
@@ -287,11 +282,9 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 <td className="py-2.5 px-3 font-medium text-slate-800">Visualizar Ativos & Garantias</td>
                 <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
                 <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
-                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-medium text-slate-800">Auditar Histórico & Download de PDFs</td>
-                <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
                 <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
                 <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
               </tr>
@@ -299,24 +292,20 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
                 <td className="py-2.5 px-3 font-medium text-slate-800">Cadastrar Novos Equipamentos (PAT)</td>
                 <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
                 <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
-                <td className="py-2.5 px-3 text-center text-red-500 font-semibold"><XCircle className="w-4 h-4 mx-auto text-red-400" /></td>
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-medium text-slate-800">Registrar Substituição / Termo de Troca</td>
                 <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
                 <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
-                <td className="py-2.5 px-3 text-center text-red-500 font-semibold"><XCircle className="w-4 h-4 mx-auto text-red-400" /></td>
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-medium text-slate-800">Gestão de Usuários & Credenciais</td>
                 <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
                 <td className="py-2.5 px-3 text-center text-red-500 font-semibold"><XCircle className="w-4 h-4 mx-auto text-red-400" /></td>
-                <td className="py-2.5 px-3 text-center text-red-500 font-semibold"><XCircle className="w-4 h-4 mx-auto text-red-400" /></td>
               </tr>
               <tr>
                 <td className="py-2.5 px-3 font-medium text-slate-800">Acesso a APIs Administrativas (/api/admin/*)</td>
                 <td className="py-2.5 px-3 text-center text-emerald-600 font-semibold"><Check className="w-4 h-4 mx-auto" /></td>
-                <td className="py-2.5 px-3 text-center text-red-500 font-semibold"><XCircle className="w-4 h-4 mx-auto text-red-400" /></td>
                 <td className="py-2.5 px-3 text-center text-red-500 font-semibold"><XCircle className="w-4 h-4 mx-auto text-red-400" /></td>
               </tr>
             </tbody>

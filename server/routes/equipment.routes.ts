@@ -59,7 +59,7 @@ equipmentRouter.get('/:tag', async (req: Request, res: Response): Promise<void> 
 /**
  * POST /api/equipments
  * Cadastro de novo bem patrimonial com validação estrita no backend.
- * Requer papel de Técnico ou Administrador (bloqueado para Auditor/VIEWER somente-leitura).
+ * Requer papel de Técnico ou Administrador.
  */
 equipmentRouter.post(
   '/',

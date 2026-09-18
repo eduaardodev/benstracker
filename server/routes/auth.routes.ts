@@ -191,12 +191,6 @@ authRouter.get('/demo-accounts', (_req: Request, res: Response): void => {
         email: 'admin.ti@empresa.com.br',
         matricula: 'ADM-1001',
       },
-      {
-        role: 'VIEWER',
-        name: 'Auditoria Interna de Patrimônio',
-        email: 'auditoria@empresa.com.br',
-        matricula: 'AUD-3005',
-      },
     ],
   });
 });

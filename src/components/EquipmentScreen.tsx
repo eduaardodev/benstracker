@@ -8,7 +8,7 @@ import {
   Calendar, 
   FileCheck, 
   Search, 
-  ShieldAlert,
+  ShieldAlert, 
   SlidersHorizontal,
   PlusCircle,
   Monitor,
@@ -21,8 +21,7 @@ import {
   MapPin,
   Clock,
   Check,
-  Filter,
-  Eye
+  Filter
 } from 'lucide-react';
 import { Equipment, EquipmentType, UserProfile } from '../types';
 
@@ -60,16 +59,11 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
   onSubTabChange,
   currentUser,
 }) => {
-  const isAuditor = currentUser?.roleCode === 'VIEWER' || currentUser?.email.toLowerCase().includes('auditoria');
-
   // Internal tab state with fallback
   const [internalTab, setInternalTab] = useState<'list' | 'register'>('list');
-  const activeTab = isAuditor ? 'list' : (externalSubTab || internalTab);
+  const activeTab = externalSubTab || internalTab;
 
   const handleTabSwitch = (tab: 'list' | 'register') => {
-    if (isAuditor && tab === 'register') {
-      return;
-    }
     setInternalTab(tab);
     if (onSubTabChange) {
       onSubTabChange(tab);
@@ -339,23 +333,16 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
               </div>
             </div>
 
-            {/* Direct CTA to Register Tab or Auditor Badge */}
-            {isAuditor ? (
-              <div className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-lg text-xs font-semibold shrink-0">
-                <Eye className="w-4 h-4 text-emerald-600" />
-                <span>Auditoria (Somente Leitura)</span>
-              </div>
-            ) : (
-              <button
-                type="button"
-                id="btn-goto-register-tab"
-                onClick={() => handleTabSwitch('register')}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-lg shadow-sm transition-colors cursor-pointer shrink-0 min-h-[40px]"
-              >
-                <PackagePlus className="w-4 h-4" />
-                <span>Novo Equipamento</span>
-              </button>
-            )}
+            {/* Direct CTA to Register Tab */}
+            <button
+              type="button"
+              id="btn-goto-register-tab"
+              onClick={() => handleTabSwitch('register')}
+              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold text-xs sm:text-sm rounded-lg shadow-sm transition-colors cursor-pointer shrink-0 min-h-[40px]"
+            >
+              <PackagePlus className="w-4 h-4" />
+              <span>Novo Equipamento</span>
+            </button>
           </div>
 
           {/* List of Registered Assets */}
@@ -370,16 +357,14 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
                   ? 'Tente ajustar ou limpar os filtros de busca para visualizar os itens.'
                   : 'Nenhum equipamento cadastrado ainda no sistema.'}
               </p>
-              {!isAuditor && (
-                <button
-                  type="button"
-                  onClick={() => handleTabSwitch('register')}
-                  className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 cursor-pointer"
-                >
-                  <PackagePlus className="w-4 h-4" />
-                  <span>Registrar Primeiro Equipamento</span>
-                </button>
-              )}
+              <button
+                type="button"
+                onClick={() => handleTabSwitch('register')}
+                className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-xs font-semibold hover:bg-blue-700 cursor-pointer"
+              >
+                <PackagePlus className="w-4 h-4" />
+                <span>Registrar Primeiro Equipamento</span>
+              </button>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5">
@@ -485,7 +470,7 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
                       <span>Retirada: {eq.checkoutDate}</span>
                     </div>
 
-                    {onInitiateTransfer && eq.status === 'Disponível' && !isAuditor && (
+                    {onInitiateTransfer && eq.status === 'Disponível' && (
                       <button
                         type="button"
                         onClick={() => onInitiateTransfer(eq)}

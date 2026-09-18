@@ -113,6 +113,19 @@ class UserService {
   }
 
   /**
+   * Redefine a senha de um usuário através do ORM.
+   */
+  public async resetPassword(userId: string, newPassword = 'SenhaSimples2026'): Promise<SafeUser> {
+    const user = await this.findById(userId);
+    if (!user) {
+      throw new Error('Usuário não encontrado.');
+    }
+    const newHash = await hashPassword(newPassword);
+    await this.updatePassword(userId, newHash);
+    return this.toSafeUser(user);
+  }
+
+  /**
    * Consulta todos os usuários através do ORM.
    */
   public async getAllUsers(): Promise<SafeUser[]> {

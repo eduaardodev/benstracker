@@ -44,7 +44,7 @@ export const registerSchema = z.object({
     .min(2, 'Cargo deve conter ao menos 2 caracteres.')
     .max(100, 'Cargo não pode exceder 100 caracteres.'),
   role: z
-    .enum(['ADMIN', 'TECHNICIAN', 'VIEWER'])
+    .enum(['ADMIN', 'TECHNICIAN'])
     .default('TECHNICIAN'),
   password: z
     .string()

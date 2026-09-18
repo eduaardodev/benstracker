@@ -27,7 +27,7 @@ movementRouter.get('/', async (_req: Request, res: Response): Promise<void> => {
 /**
  * POST /api/movements
  * Registra movimentação de bem patrimonial com integridade transacional ACID.
- * Requer papel de Técnico ou Administrador (bloqueado para Auditor/VIEWER somente-leitura).
+ * Requer papel de Técnico ou Administrador.
  */
 movementRouter.post(
   '/',

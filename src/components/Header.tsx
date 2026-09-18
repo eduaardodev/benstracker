@@ -10,7 +10,6 @@ import {
   Menu,
   X,
   ShieldCheck,
-  Eye,
   Shield
 } from 'lucide-react';
 import { UserProfile } from '../types';
@@ -34,7 +33,6 @@ export const Header: React.FC<HeaderProps> = ({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const isAdmin = currentUser.roleCode === 'ADMIN' || currentUser.email.toLowerCase().includes('admin');
-  const isAuditor = currentUser.roleCode === 'VIEWER' || currentUser.email.toLowerCase().includes('auditoria');
 
   const handleTabClick = (tab: ActiveTab) => {
     onSelectTab(tab);
@@ -97,22 +95,19 @@ export const Header: React.FC<HeaderProps> = ({
                 <span>Equipamentos</span>
               </button>
 
-              {/* Botão Cadastrar Ativo: apenas para quem tem permissão de escrita (oculto para Auditor) */}
-              {!isAuditor && (
-                <button
-                  id="nav-new-equipment"
-                  type="button"
-                  onClick={() => handleTabClick('new-equipment')}
-                  className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
-                    currentTab === 'new-equipment'
-                      ? 'bg-blue-50 text-blue-700'
-                      : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
-                  }`}
-                >
-                  <PackagePlus className="w-4 h-4 shrink-0" />
-                  <span>Cadastrar Ativo</span>
-                </button>
-              )}
+              <button
+                id="nav-new-equipment"
+                type="button"
+                onClick={() => handleTabClick('new-equipment')}
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors cursor-pointer ${
+                  currentTab === 'new-equipment'
+                    ? 'bg-blue-50 text-blue-700'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100'
+                }`}
+              >
+                <PackagePlus className="w-4 h-4 shrink-0" />
+                <span>Cadastrar Ativo</span>
+              </button>
 
               <button
                 id="nav-movements"
@@ -125,7 +120,7 @@ export const Header: React.FC<HeaderProps> = ({
                 }`}
               >
                 <ArrowLeftRight className="w-4 h-4 shrink-0" />
-                <span>{isAuditor ? 'Auditoria & Trocas' : 'Movimentações'}</span>
+                <span>Movimentações</span>
               </button>
 
               {/* Aba Exclusiva do Administrador */}
@@ -171,17 +166,11 @@ export const Header: React.FC<HeaderProps> = ({
                   <p className="text-xs font-semibold text-slate-800 leading-tight">{currentUser.name}</p>
                   <p className="text-[11px] text-slate-500 font-mono">{currentUser.matricula}</p>
                 </div>
-                {isAdmin && (
+                {isAdmin ? (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-purple-50 text-purple-700 border border-purple-200">
                     Admin
                   </span>
-                )}
-                {isAuditor && (
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                    Auditor
-                  </span>
-                )}
-                {!isAdmin && !isAuditor && (
+                ) : (
                   <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
                     Técnico
                   </span>
@@ -223,17 +212,11 @@ export const Header: React.FC<HeaderProps> = ({
                 <p className="text-xs font-bold text-slate-900">{currentUser.name}</p>
                 <p className="text-[11px] text-slate-500 font-mono">Matrícula: {currentUser.matricula}</p>
               </div>
-              {isAdmin && (
+              {isAdmin ? (
                 <span className="text-[10px] bg-purple-50 text-purple-700 px-2 py-0.5 rounded-full font-semibold border border-purple-200">
                   Admin
                 </span>
-              )}
-              {isAuditor && (
-                <span className="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full font-semibold border border-emerald-200">
-                  Auditor (Leitura)
-                </span>
-              )}
-              {!isAdmin && !isAuditor && (
+              ) : (
                 <span className="text-[10px] bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full font-semibold border border-blue-100">
                   Técnico N2
                 </span>
@@ -266,20 +249,18 @@ export const Header: React.FC<HeaderProps> = ({
               <span>Equipamentos Cadastrados</span>
             </button>
 
-            {!isAuditor && (
-              <button
-                type="button"
-                onClick={() => handleTabClick('new-equipment')}
-                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${
-                  currentTab === 'new-equipment'
-                    ? 'bg-blue-50 text-blue-700 font-semibold'
-                    : 'text-slate-700 hover:bg-slate-50'
-                }`}
-              >
-                <PackagePlus className="w-4 h-4" />
-                <span>Cadastrar Novo Ativo</span>
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={() => handleTabClick('new-equipment')}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors min-h-[44px] ${
+                currentTab === 'new-equipment'
+                  ? 'bg-blue-50 text-blue-700 font-semibold'
+                  : 'text-slate-700 hover:bg-slate-50'
+              }`}
+            >
+              <PackagePlus className="w-4 h-4" />
+              <span>Cadastrar Novo Ativo</span>
+            </button>
 
             <button
               type="button"
@@ -291,7 +272,7 @@ export const Header: React.FC<HeaderProps> = ({
               }`}
             >
               <ArrowLeftRight className="w-4 h-4" />
-              <span>{isAuditor ? 'Auditoria & Histórico de Trocas' : 'Movimentações & Trocas'}</span>
+              <span>Movimentações & Trocas</span>
             </button>
 
             {isAdmin && (
@@ -363,21 +344,19 @@ export const Header: React.FC<HeaderProps> = ({
           <span>Ativos</span>
         </button>
 
-        {/* Botão Central: Novo Ativo para técnicos/admin OU Gestão para Admin */}
-        {!isAuditor ? (
-          <button
-            type="button"
-            onClick={() => handleTabClick('new-equipment')}
-            className="flex flex-col items-center justify-center -mt-3 text-[10px] font-medium transition-transform active:scale-95 min-w-[52px]"
-          >
-            <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
-              currentTab === 'new-equipment' ? 'bg-blue-700 text-white ring-2 ring-blue-300' : 'bg-blue-600 text-white'
-            }`}>
-              <PackagePlus className="w-5 h-5" />
-            </div>
-            <span className={`mt-0.5 ${currentTab === 'new-equipment' ? 'text-blue-600 font-bold' : 'text-slate-600'}`}>Novo</span>
-          </button>
-        ) : null}
+        {/* Botão Central: Novo Ativo */}
+        <button
+          type="button"
+          onClick={() => handleTabClick('new-equipment')}
+          className="flex flex-col items-center justify-center -mt-3 text-[10px] font-medium transition-transform active:scale-95 min-w-[52px]"
+        >
+          <div className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md ${
+            currentTab === 'new-equipment' ? 'bg-blue-700 text-white ring-2 ring-blue-300' : 'bg-blue-600 text-white'
+          }`}>
+            <PackagePlus className="w-5 h-5" />
+          </div>
+          <span className={`mt-0.5 ${currentTab === 'new-equipment' ? 'text-blue-600 font-bold' : 'text-slate-600'}`}>Novo</span>
+        </button>
 
         <button
           type="button"
@@ -387,7 +366,7 @@ export const Header: React.FC<HeaderProps> = ({
           }`}
         >
           <ArrowLeftRight className="w-5 h-5 mb-0.5" />
-          <span>{isAuditor ? 'Auditoria' : 'Trocas'}</span>
+          <span>Trocas</span>
         </button>
 
         {isAdmin ? (

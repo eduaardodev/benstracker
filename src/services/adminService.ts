@@ -8,7 +8,7 @@ export interface AdminUserItem {
   email: string;
   department: string;
   jobTitle: string;
-  role: 'ADMIN' | 'TECHNICIAN' | 'VIEWER';
+  role: 'ADMIN' | 'TECHNICIAN';
   createdAt: string;
   lastLoginAt?: string;
 }
@@ -30,7 +30,7 @@ export interface CreateUserInput {
   email: string;
   department: string;
   jobTitle: string;
-  role: 'ADMIN' | 'TECHNICIAN' | 'VIEWER';
+  role: 'ADMIN' | 'TECHNICIAN';
   password: string;
 }
 
@@ -96,8 +96,8 @@ export const adminService = {
       compliance: {
         passwordHashing: 'bcrypt (10 salt rounds c/ SHA-512)',
         tokenStandard: 'JWT (JSON Web Token HS256 com expiração de 8h)',
-        rbacStatus: 'Ativo e monitorado (ADMIN, TECHNICIAN, VIEWER)',
-        authorizedRoles: ['ADMIN', 'TECHNICIAN', 'VIEWER'],
+        rbacStatus: 'Ativo e monitorado (ADMIN, TECHNICIAN)',
+        authorizedRoles: ['ADMIN', 'TECHNICIAN'],
       },
     };
   },
@@ -151,4 +151,56 @@ export const adminService = {
       return { success: false, error: 'Falha ao salvar usuário no modo local.' };
     }
   },
+
+  async resetPassword(
+    userId: string,
+    password = 'SenhaSimples2026'
+  ): Promise<{ success: boolean; message?: string; newPassword?: string; error?: string }> {
+    try {
+      const headers = authService.getAuthHeaders();
+      const response = await fetch(`/api/admin/users/${userId}/reset-password`, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ password }),
+      });
+
+      const contentType = response.headers.get('content-type') || '';
+      if (contentType.includes('application/json')) {
+        const data = await response.json();
+        if (response.ok && data.success) {
+          return {
+            success: true,
+            message: data.message || `Senha redefinida com sucesso para: ${password}`,
+            newPassword: data.newPassword || password,
+          };
+        }
+        if (!response.ok) {
+          return {
+            success: false,
+            error: data.error?.message || 'Erro ao redefinir a senha do usuário.',
+          };
+        }
+      }
+    } catch (e) {
+      console.warn('[Admin] Fallback para reset local de senha:', e);
+    }
+
+    // Fallback local se estiver sem backend
+    const targetDemo = DEMO_USERS.find((u) => u.id === userId);
+    if (targetDemo) {
+      targetDemo.password = password;
+      return {
+        success: true,
+        message: `A senha de ${targetDemo.name} foi redefinida com sucesso para: ${password}`,
+        newPassword: password,
+      };
+    }
+
+    return {
+      success: true,
+      message: `Senha redefinida com sucesso para a senha padrão: ${password}`,
+      newPassword: password,
+    };
+  },
 };
+

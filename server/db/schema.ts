@@ -13,7 +13,7 @@ export const users = sqliteTable('users', {
   email: text('email').notNull().unique(),
   department: text('department').notNull(),
   jobTitle: text('job_title').notNull(),
-  role: text('role', { enum: ['ADMIN', 'TECHNICIAN', 'VIEWER'] }).notNull(),
+  role: text('role', { enum: ['ADMIN', 'TECHNICIAN'] }).notNull(),
   passwordHash: text('password_hash').notNull(),
   createdAt: text('created_at').notNull(),
   lastLoginAt: text('last_login_at'),

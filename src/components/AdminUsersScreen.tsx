@@ -4,22 +4,18 @@ import {
   UserPlus, 
   Users, 
   Search, 
-  ShieldAlert, 
   CheckCircle2, 
   AlertCircle, 
   X, 
   Lock, 
-  Mail, 
-  Building2, 
-  Briefcase, 
-  KeyRound, 
   RefreshCw,
-  FileCheck,
-  Eye,
   Wrench,
-  Shield
+  Shield,
+  KeyRound,
+  Copy,
+  Check
 } from 'lucide-react';
-import { adminService, AdminUserItem, SecurityAuditInfo, CreateUserInput } from '../services/adminService';
+import { adminService, AdminUserItem, CreateUserInput } from '../services/adminService';
 import { UserProfile } from '../types';
 
 interface AdminUsersScreenProps {
@@ -28,15 +24,19 @@ interface AdminUsersScreenProps {
 
 export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser }) => {
   const [users, setUsers] = useState<AdminUserItem[]>([]);
-  const [securityAudit, setSecurityAudit] = useState<SecurityAuditInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterRole, setFilterRole] = useState<'ALL' | 'ADMIN' | 'TECHNICIAN' | 'VIEWER'>('ALL');
+  const [filterRole, setFilterRole] = useState<'ALL' | 'ADMIN' | 'TECHNICIAN'>('ALL');
 
-  // Modal State
+  // Modal State: Create User
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [feedback, setFeedback] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+
+  // Modal State: Reset Password
+  const [resetTargetUser, setResetTargetUser] = useState<AdminUserItem | null>(null);
+  const [isResetting, setIsResetting] = useState(false);
+  const [copiedPassword, setCopiedPassword] = useState(false);
 
   // Form fields
   const [formName, setFormName] = useState('');
@@ -44,18 +44,14 @@ export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser 
   const [formEmail, setFormEmail] = useState('');
   const [formDept, setFormDept] = useState('');
   const [formJobTitle, setFormJobTitle] = useState('');
-  const [formRole, setFormRole] = useState<'ADMIN' | 'TECHNICIAN' | 'VIEWER'>('TECHNICIAN');
+  const [formRole, setFormRole] = useState<'ADMIN' | 'TECHNICIAN'>('TECHNICIAN');
   const [formPassword, setFormPassword] = useState('');
 
   const loadData = async () => {
     setIsLoading(true);
     try {
-      const [usersData, auditData] = await Promise.all([
-        adminService.getUsers(),
-        adminService.getSecurityAudit(),
-      ]);
+      const usersData = await adminService.getUsers();
       setUsers(usersData.users);
-      setSecurityAudit(auditData);
     } catch {
       setFeedback({
         type: 'error',
@@ -134,6 +130,34 @@ export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser 
     }
   };
 
+  const handleResetPasswordConfirm = async () => {
+    if (!resetTargetUser) return;
+    setIsResetting(true);
+    setFeedback(null);
+    try {
+      const result = await adminService.resetPassword(resetTargetUser.id, 'SenhaSimples2026');
+      if (result.success) {
+        setFeedback({
+          type: 'success',
+          message: `A senha de ${resetTargetUser.name} (${resetTargetUser.matricula}) foi redefinida com sucesso para: SenhaSimples2026`,
+        });
+        setResetTargetUser(null);
+      } else {
+        setFeedback({
+          type: 'error',
+          message: result.error || 'Erro ao redefinir a senha do usuário.',
+        });
+      }
+    } catch {
+      setFeedback({
+        type: 'error',
+        message: 'Erro inesperado ao redefinir a senha.',
+      });
+    } finally {
+      setIsResetting(false);
+    }
+  };
+
   // Filtered Users
   const filteredUsers = users.filter((u) => {
     const matchesSearch =
@@ -148,9 +172,8 @@ export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser 
 
   const adminCount = users.filter((u) => u.role === 'ADMIN').length;
   const techCount = users.filter((u) => u.role === 'TECHNICIAN').length;
-  const viewerCount = users.filter((u) => u.role === 'VIEWER').length;
 
-  const getRoleBadge = (role: 'ADMIN' | 'TECHNICIAN' | 'VIEWER') => {
+  const getRoleBadge = (role: 'ADMIN' | 'TECHNICIAN') => {
     switch (role) {
       case 'ADMIN':
         return (
@@ -164,13 +187,6 @@ export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser 
           <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
             <Wrench className="w-3.5 h-3.5 text-blue-600" />
             Técnico Operacional
-          </span>
-        );
-      case 'VIEWER':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200">
-            <Eye className="w-3.5 h-3.5 text-emerald-600" />
-            Auditor (Somente Leitura)
           </span>
         );
     }
@@ -193,7 +209,7 @@ export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser 
                 </span>
               </div>
               <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-                Controle de colaboradores, permissões de acesso RBAC e auditoria de segurança
+                Controle de colaboradores e permissões de acesso no sistema
               </p>
             </div>
           </div>
@@ -249,7 +265,7 @@ export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser 
       )}
 
       {/* Role Metrics Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
         <div className="bg-white p-4 sm:p-5 rounded-xl border border-slate-200 shadow-2xs">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Total de Contas</span>
@@ -282,43 +298,7 @@ export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser 
           <p className="text-2xl font-bold text-blue-900 mt-2">{techCount}</p>
           <p className="text-[11px] text-blue-600/80 mt-0.5">Operações e trocas de bens</p>
         </div>
-
-        <div className="bg-white p-4 sm:p-5 rounded-xl border border-emerald-100 shadow-2xs">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-emerald-700 uppercase tracking-wider">Auditores</span>
-            <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-700">
-              <Eye className="w-4 h-4" />
-            </div>
-          </div>
-          <p className="text-2xl font-bold text-emerald-900 mt-2">{viewerCount}</p>
-          <p className="text-[11px] text-emerald-600/80 mt-0.5">Somente leitura e relatórios</p>
-        </div>
       </div>
-
-      {/* Security & Cryptography Banner */}
-      {securityAudit && (
-        <div className="bg-gradient-to-r from-slate-900 to-slate-800 text-white rounded-xl p-5 shadow-xs flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-          <div className="flex items-start gap-3">
-            <div className="p-2 rounded-lg bg-white/10 text-emerald-400 shrink-0">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                Auditoria de Conformidade e Proteção de Dados
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-mono">
-                  RBAC ATIVO
-                </span>
-              </h3>
-              <p className="text-xs text-slate-300 mt-0.5">
-                Criptografia: <strong>{securityAudit.compliance.passwordHashing}</strong> • Sessões: <strong>{securityAudit.compliance.tokenStandard}</strong>
-              </p>
-            </div>
-          </div>
-          <div className="text-xs text-slate-400 font-mono shrink-0">
-            Última checagem: {new Date(securityAudit.auditDate).toLocaleTimeString('pt-BR')}
-          </div>
-        </div>
-      )}
 
       {/* Users Table Card */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-xs overflow-hidden">
@@ -345,7 +325,6 @@ export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser 
               <option value="ALL">Todos os Perfis ({users.length})</option>
               <option value="ADMIN">Administradores ({adminCount})</option>
               <option value="TECHNICIAN">Técnicos ({techCount})</option>
-              <option value="VIEWER">Auditores ({viewerCount})</option>
             </select>
           </div>
         </div>
@@ -360,12 +339,13 @@ export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser 
                 <th className="py-3 px-4">Lotação / Cargo</th>
                 <th className="py-3 px-4">Papel no Sistema (RBAC)</th>
                 <th className="py-3 px-4">Privilégio</th>
+                <th className="py-3 px-4 text-right">Ações</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="py-8 text-center text-slate-400 text-xs">
+                  <td colSpan={6} className="py-8 text-center text-slate-400 text-xs">
                     Nenhum colaborador encontrado com os critérios pesquisados.
                   </td>
                 </tr>
@@ -412,13 +392,29 @@ export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser 
 
                       <td className="py-3.5 px-4 text-xs text-slate-600">
                         {u.role === 'ADMIN' && (
-                          <span className="text-purple-800 font-medium">Gestão total, rotas /admin e criação de contas</span>
+                          <span className="text-purple-800 font-medium">Gestão total, rotas de administração e criação de contas</span>
                         )}
                         {u.role === 'TECHNICIAN' && (
                           <span className="text-blue-800 font-medium">Substituição de bens e cadastro de inventário</span>
                         )}
-                        {u.role === 'VIEWER' && (
-                          <span className="text-emerald-800 font-medium">Somente consulta, auditoria e download de termos</span>
+                      </td>
+
+                      <td className="py-3.5 px-4 text-right">
+                        {u.role === 'TECHNICIAN' ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setResetTargetUser(u);
+                              setCopiedPassword(false);
+                            }}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 active:bg-amber-200 text-amber-900 border border-amber-200 rounded-lg text-xs font-semibold transition-colors cursor-pointer shadow-2xs"
+                            title={`Resetar senha de ${u.name} para SenhaSimples2026`}
+                          >
+                            <KeyRound className="w-3.5 h-3.5 text-amber-600" />
+                            <span>Resetar Senha</span>
+                          </button>
+                        ) : (
+                          <span className="text-[11px] text-slate-400 font-medium italic">Admin</span>
                         )}
                       </td>
                     </tr>
@@ -429,6 +425,120 @@ export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser 
           </table>
         </div>
       </div>
+
+      {/* Modal: Reset de Senha de Usuário Técnico */}
+      {resetTargetUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-xs p-4 overflow-y-auto">
+          <div className="bg-white rounded-2xl border border-slate-200 shadow-2xl max-w-md w-full overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-150">
+            <div className="p-5 sm:p-6 border-b border-slate-100 flex items-center justify-between bg-amber-50/60">
+              <div className="flex items-center gap-2.5">
+                <div className="p-2 rounded-xl bg-amber-100 text-amber-800 border border-amber-200">
+                  <KeyRound className="w-5 h-5" />
+                </div>
+                <div>
+                  <h2 className="text-base sm:text-lg font-bold text-slate-900">Resetar Senha de Técnico</h2>
+                  <p className="text-xs text-slate-500">Definição de senha genérica de acesso</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setResetTargetUser(null)}
+                className="p-1.5 text-slate-400 hover:text-slate-600 rounded-lg cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="p-5 sm:p-6 space-y-4">
+              {/* Card de Informações do Técnico */}
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 space-y-1.5 text-xs">
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Colaborador:</span>
+                  <span className="font-bold text-slate-900">{resetTargetUser.name}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Matrícula:</span>
+                  <span className="font-mono font-bold text-slate-800">{resetTargetUser.matricula}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">E-mail:</span>
+                  <span className="text-slate-700">{resetTargetUser.email}</span>
+                </div>
+                <div className="flex items-center justify-between">
+                  <span className="text-slate-500 font-medium">Lotação:</span>
+                  <span className="text-slate-700">{resetTargetUser.department}</span>
+                </div>
+              </div>
+
+              {/* Informação e Destaque da Senha Genérica */}
+              <div className="p-4 rounded-xl bg-amber-50 border border-amber-200">
+                <p className="text-xs text-amber-900 font-medium mb-2">
+                  A credencial de acesso desta conta técnica será redefinida para a senha genérica:
+                </p>
+                <div className="flex items-center justify-between px-3.5 py-2.5 bg-white border border-amber-300 rounded-lg shadow-2xs">
+                  <div className="flex items-center gap-2">
+                    <Lock className="w-4 h-4 text-amber-600 shrink-0" />
+                    <span className="font-mono font-bold text-sm text-slate-900 tracking-wider select-all">
+                      SenhaSimples2026
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText('SenhaSimples2026');
+                      setCopiedPassword(true);
+                      setTimeout(() => setCopiedPassword(false), 2000);
+                    }}
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-amber-800 hover:text-amber-950 px-2.5 py-1 rounded bg-amber-100/70 hover:bg-amber-200/80 transition-colors cursor-pointer"
+                    title="Copiar senha genérica"
+                  >
+                    {copiedPassword ? (
+                      <>
+                        <Check className="w-3.5 h-3.5 text-emerald-600" />
+                        <span className="text-emerald-700 font-bold">Copiado!</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="w-3.5 h-3.5 text-amber-700" />
+                        <span>Copiar</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+
+              <p className="text-[11px] text-slate-500 leading-relaxed">
+                Ao confirmar, a alteração entra em vigor no mesmo instante. O técnico poderá acessar a plataforma digitando a matrícula ou e-mail com a nova senha.
+              </p>
+
+              <div className="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
+                <button
+                  type="button"
+                  onClick={() => setResetTargetUser(null)}
+                  className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={handleResetPasswordConfirm}
+                  disabled={isResetting}
+                  className="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-semibold rounded-lg shadow-xs transition-colors inline-flex items-center gap-2 cursor-pointer disabled:opacity-70"
+                >
+                  {isResetting ? (
+                    <span>Redefinindo...</span>
+                  ) : (
+                    <>
+                      <KeyRound className="w-3.5 h-3.5" />
+                      <span>Confirmar Reset de Senha</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Modal: Cadastrar Novo Usuário */}
       {isCreateModalOpen && (
@@ -531,7 +641,7 @@ export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser 
                 <label className="block text-xs font-semibold text-slate-700 mb-1.5">
                   Papel de Acesso (RBAC) *
                 </label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setFormRole('TECHNICIAN')}
@@ -544,20 +654,6 @@ export const AdminUsersScreen: React.FC<AdminUsersScreenProps> = ({ currentUser 
                     <Wrench className="w-4 h-4 text-blue-600 mb-1" />
                     <span className="text-xs font-bold block">Técnico</span>
                     <span className="text-[10px] text-slate-500 block leading-tight mt-0.5">Operações & Trocas</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setFormRole('VIEWER')}
-                    className={`p-2.5 rounded-lg border text-left cursor-pointer transition-all ${
-                      formRole === 'VIEWER'
-                        ? 'bg-emerald-50 border-emerald-500 text-emerald-900 ring-1 ring-emerald-500'
-                        : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
-                    }`}
-                  >
-                    <Eye className="w-4 h-4 text-emerald-600 mb-1" />
-                    <span className="text-xs font-bold block">Auditor</span>
-                    <span className="text-[10px] text-slate-500 block leading-tight mt-0.5">Somente Leitura</span>
                   </button>
 
                   <button
