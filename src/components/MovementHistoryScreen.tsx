@@ -35,7 +35,7 @@ interface MovementHistoryScreenProps {
   movements: MovementRecord[];
   equipments: Equipment[];
   currentUser: UserProfile;
-  onAddMovement: (record: MovementRecord) => void;
+  onAddMovement: (record: MovementRecord) => Promise<boolean> | void;
   openNewTransferDirectly?: boolean;
 }
 
@@ -94,7 +94,7 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
     }
   };
 
-  const handleFormSubmit = (e: React.FormEvent) => {
+  const handleFormSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!acceptanceTermSigned) {
@@ -151,7 +151,11 @@ export const MovementHistoryScreen: React.FC<MovementHistoryScreenProps> = ({
       },
     };
 
-    onAddMovement(newRecord);
+    const savedSuccess = await onAddMovement(newRecord);
+    if (savedSuccess === false) {
+      return;
+    }
+
     setIsModalOpen(false);
 
     // Reset fields

@@ -17,6 +17,8 @@ import { EquipmentScreen } from './components/EquipmentScreen';
 import { MovementHistoryScreen } from './components/MovementHistoryScreen';
 import { ProfileScreen } from './components/ProfileScreen';
 import { ShieldCheck, CheckCircle2, ChevronDown } from 'lucide-react';
+import { authService } from './services/authService';
+import { apiService } from './services/apiService';
 
 export default function App() {
   // Authentication State
@@ -46,6 +48,22 @@ export default function App() {
     return saved ? JSON.parse(saved) : INITIAL_MOVEMENTS;
   });
 
+  // Sincronização inicial com o backend
+  useEffect(() => {
+    if (isAuthenticated) {
+      apiService.fetchEquipments().then((data) => {
+        if (data && data.length > 0) {
+          setEquipments(data);
+        }
+      });
+      apiService.fetchMovements().then((data) => {
+        if (data && data.length > 0) {
+          setMovements(data);
+        }
+      });
+    }
+  }, [isAuthenticated]);
+
   // Persist state updates
   useEffect(() => {
     localStorage.setItem('app_is_authenticated', JSON.stringify(isAuthenticated));
@@ -71,15 +89,31 @@ export default function App() {
   };
 
   const handleLogout = () => {
+    authService.clearToken();
     setIsAuthenticated(false);
   };
 
-  const handleAddEquipment = (equipment: Equipment) => {
-    setEquipments((prev) => [equipment, ...prev]);
+  const handleAddEquipment = async (equipment: Equipment): Promise<boolean> => {
+    // Validação estrita no backend com Zod e persistência via ORM
+    const result = await apiService.createEquipment(equipment);
+    if (!result.success) {
+      alert(result.error || 'Erro ao cadastrar equipamento.');
+      return false;
+    }
+    const saved = result.data || equipment;
+    setEquipments((prev) => [saved, ...prev]);
+    return true;
   };
 
-  const handleAddMovement = (record: MovementRecord) => {
-    setMovements((prev) => [record, ...prev]);
+  const handleAddMovement = async (record: MovementRecord): Promise<boolean> => {
+    // Validação estrita no backend e persistência transacional via ORM
+    const result = await apiService.createMovement(record);
+    if (!result.success) {
+      alert(result.error || 'Erro ao registrar movimentação.');
+      return false;
+    }
+    const saved = result.data || record;
+    setMovements((prev) => [saved, ...prev]);
 
     // Update the statuses of old & new equipment automatically
     setEquipments((prev) =>
@@ -102,6 +136,7 @@ export default function App() {
         return eq;
       })
     );
+    return true;
   };
 
   const handleInitiateTransferWithEquipment = (_equipment: Equipment) => {

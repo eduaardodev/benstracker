@@ -76,6 +76,8 @@ export interface UserProfile {
   email: string;
   department: string;
   role: string;
+  roleCode?: 'ADMIN' | 'TECHNICIAN' | 'VIEWER';
+  token?: string;
   avatarUrl?: string;
   createdAt: string;
 }

@@ -27,7 +27,7 @@ import { Equipment, EquipmentType } from '../types';
 
 interface EquipmentScreenProps {
   equipments: Equipment[];
-  onAddEquipment: (equipment: Equipment) => void;
+  onAddEquipment: (equipment: Equipment) => Promise<boolean> | void;
   onInitiateTransfer?: (equipment: Equipment) => void;
   activeSubTab?: 'list' | 'register';
   onSubTabChange?: (subTab: 'list' | 'register') => void;
@@ -125,7 +125,7 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!responsibilityTermAccepted) {
@@ -162,7 +162,11 @@ export const EquipmentScreen: React.FC<EquipmentScreenProps> = ({
       createdAt: new Date().toISOString(),
     };
 
-    onAddEquipment(newEquip);
+    const savedSuccess = await onAddEquipment(newEquip);
+    if (savedSuccess === false) {
+      return;
+    }
+
     setLastRegisteredTag(newEquip.tag);
 
     setFeedbackMessage(`Equipamento ${newEquip.tag} (${newEquip.brandModel}) cadastrado com sucesso no inventário!`);
